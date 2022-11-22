@@ -217,24 +217,25 @@ def checkForBulletCollision():
         nextPlayer()
         return
 
+    currentPlayerWeapon = currentPlayer.getCurrentWeapon()
     #falls eine Kugel direkt auf den Panzer trifft
     for Tank in playerObjects:
         if bulletPosition[0] > Tank.tx and bulletPosition[0] < Tank.tx+Tank.twidth:
             if bulletPosition[1] > Tank.ty-5 and bulletPosition[1] < Tank.ty + 2* Tank.theight:
-                Tank.tLp -= currentPlayer.weapons[currentPlayer.currentWeapon][3]
-                terrain.explosion(bulletPosition[0], currentPlayer.weapons[currentPlayer.currentWeapon][1])
+                Tank.tLp -= currentPlayerWeapon.damage
+                terrain.explosion(bulletPosition[0], currentPlayerWeapon.explosionRadius)
                 projectileGoing = False
                 nextPlayer()
 
     #kollisionskontrolle mit dem terrain
     if bulletPosition[1] >= w_height-terrain.yWerte[bulletPosition[0]]:
-        explosionRadius = currentPlayer.weapons[currentPlayer.currentWeapon][1]
+        explosionRadius = currentPlayerWeapon.explosionRadius
         terrain.explosion(bulletPosition[0], explosionRadius)
         projectileGoing = False
         #schadensverwaltung für panzer im umkreis der Explosion
         for Tank in playerObjects:
             if Tank.tx > bulletPosition[0] - explosionRadius and Tank.tx < bulletPosition[0] + explosionRadius:
-                Tank.tLp -= int(currentPlayer.weapons[currentPlayer.currentWeapon][3]/2)
+                Tank.tLp -= int(currentPlayerWeapon.damage/2)
         nextPlayer()
 
 
@@ -272,8 +273,8 @@ def redrawGame():
     message_to_screen(str("LP: " + str(currentPlayer.tLp)), black, 20, (currentPlayer.twidth+5, 30))
 
     #--Weapons and Amount
-    stringWeapons = str(currentPlayer.weapons[currentPlayer.currentWeapon][2]) + " : "
-    stringWeapons += str(currentPlayer.weapons[currentPlayer.currentWeapon][0])
+    stringWeapons = str(currentPlayer.getCurrentWeapon().amount) + " : "
+    stringWeapons += str(currentPlayer.getCurrentWeapon().name)
     message_to_screen(stringWeapons, black, 20, (400,5))
 
     #--cahngeWeaponButton

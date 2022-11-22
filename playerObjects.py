@@ -1,6 +1,7 @@
 import pygame
 import math
 import random
+from weapons import Weapon
 
 class PlayerObject:
     def __init__(self, x, y, xSpeed, ySpeed):
@@ -34,7 +35,7 @@ class Tank:
         self.fuel = 500                     #the fuel for each round
         self.scorePoints = 0                #you can buy stuff with those, also they represent your score
         self.fuelPerMove = 5
-        self.weapons = [["Small Missile", 20, 1000, 10], ["Vulcano Bomb", 50, 100, 50], ["Ball", 100, 100, 200], ["BigBall", 300, 10, 1000]]
+        self.weapons = [Weapon.getSmallMissile(), Weapon.getVulcanoBomb(), Weapon.getBall(), Weapon.getBigBall()]
         self.currentWeapon = 0
         #self.weapons = ("Name", explosionRadius, amount, damage)
         #self.currentWeapon: index of current seleycted weapon
@@ -71,10 +72,13 @@ class Tank:
                 self.fuel -= self.fuelPerMove
     
     def fire(self):
-        self.weapons[self.currentWeapon][2] -= 1
+        self.getCurrentWeapon().decrementAmount()
         
-        if self.weapons[self.currentWeapon][2] == 0:
+        if self.getCurrentWeapon().hasAmmoLeft():
             self.weapons.pop(self.currentWeapon)
+    
+    def getCurrentWeapon(self):
+        return self.weapons[self.currentWeapon]
 
             
     def changeWeapon(self):
