@@ -1,0 +1,31 @@
+---------------------------DESIGN UND AUSSEHEN------------------------
+
+-Hintergrundbilder: Menü und für einzelne Terrains
+--Hintergrundbild Menü animieren
+--Hintergundbilder Terrains animieren
+
+-Menü: Schriftart, Schriftfarbe und Platzierung verschönern
+
+-Verschiedene Terrainfunktionen bereitstellen 
+
+-Animation für unterschiedliche Waffen
+
+-Panzerdesign überarbeiten
+-------------------------SPIELMECHANIK--------------------------------
+
+-Schaden für Panzer bei Explosion
+
+-Rundensystem implementieren
+
+-Shop nach Abgeschlossener Runde implementieren
+--Rundensystem muss auch für Shop gelten
+
+-Panzer KI
+
+-Datenübersicht von Spieler (Aktueller Winkel)
+
+-Spawnsystem überarbeiten
+
+-Rundenende schreiben (aufgehört bei Line 154, Waffenmechanik und Shop)
+
+-Fabren für Panzer 
