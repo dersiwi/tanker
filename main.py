@@ -3,7 +3,7 @@ import math
 import random
 #from tankClass import Tank
 #from terrainClass import terrain
-from playerObjects import Terrain, Sun, Tank
+from playerObjects import Terrain, Sun, Tank, Projectile
 pygame.init()
 
 
@@ -71,6 +71,9 @@ currentPlayer = None
 terrain = Terrain(w_width, w_height)
 terrain.generate(terrainTypeSelected)
 sun = Sun(w_width, w_height)
+
+bullet = None
+
 gameObjects.append(terrain)
 gameObjects.append(sun)
 
@@ -155,8 +158,7 @@ def checkMouseClickGame(pos):
     #message_to_screen("FIRE", red, 25, (750, 25))
     if x > 750 and x < 750 + 50:
         if y > 25 and y < 25 + 30:
-            if not projectileGoing:
-                fire()
+            fire()
 
 def checkMouseClickShopMenu(pos):
     x = pos[0]
@@ -187,9 +189,8 @@ def nextPlayer():
         nextPlayer()
 
 def fire():
-    global projectileGoing, bulletPosition, SpeedRoundX, SpeedRoundY
+    global bullet
     currentPlayer.fire()
-    projectileGoing = True
     pos = currentPlayer.calculateTurretEndPos()
     
     
@@ -199,45 +200,15 @@ def fire():
     angle = currentPlayer.turretAngle
     SpeedRoundY = currentPlayer.v0
     SpeedRoundX = int(round(currentPlayer.v0 * math.cos(angle*180/math.pi)))
-    
-def calculateProjectilePosition():
-    #errechnet die FLugbahn eines Projektils
-    global gravity, SpeedRoundY, SpeedRoundX, gravity
-    bulletPosition[0] += SpeedRoundX
-    bulletPosition[1] -= SpeedRoundY
-    SpeedRoundY -= gravity
-    checkForBulletCollision()
-    return (bulletPosition[0],bulletPosition[1])
+    bullet = Projectile(pos[0], pos[1], SpeedRoundX, SpeedRoundY, terrain, gravity, currentPlayer.getCurrentWeapon(), playerObjects)
+    gameObjects.append(bullet)
 
-def checkForBulletCollision():
-    #Kollisoinskontrolle für die Kanonenkugel mit dem terrain und anderen Pnazern
-    global projectileGoing
-    if bulletPosition[0] > w_width or bulletPosition[0] < 0:
-        projectileGoing = False
-        nextPlayer()
-        return
 
-    currentPlayerWeapon = currentPlayer.getCurrentWeapon()
-    #falls eine Kugel direkt auf den Panzer trifft
-    for Tank in playerObjects:
-        if bulletPosition[0] > Tank.tx and bulletPosition[0] < Tank.tx+Tank.twidth:
-            if bulletPosition[1] > Tank.ty-5 and bulletPosition[1] < Tank.ty + 2* Tank.theight:
-                Tank.tLp -= currentPlayerWeapon.damage
-                terrain.explosion(bulletPosition[0], currentPlayerWeapon.explosionRadius)
-                projectileGoing = False
-                nextPlayer()
-
-    #kollisionskontrolle mit dem terrain
-    if bulletPosition[1] >= w_height-terrain.yWerte[bulletPosition[0]]:
-        explosionRadius = currentPlayerWeapon.explosionRadius
-        terrain.explosion(bulletPosition[0], explosionRadius)
-        projectileGoing = False
-        #schadensverwaltung für panzer im umkreis der Explosion
-        for Tank in playerObjects:
-            if Tank.tx > bulletPosition[0] - explosionRadius and Tank.tx < bulletPosition[0] + explosionRadius:
-                Tank.tLp -= int(currentPlayerWeapon.damage/2)
-        nextPlayer()
-
+def bulletHit():
+    global bullet
+    gameObjects.remove(bullet)
+    bullet = None
+    nextPlayer()
 
     
 #----------------------GRAPHICAL FUNCTIONS--------------------------------------
@@ -250,10 +221,11 @@ def message_to_screen(msg, color, fontSize, fontKoordinaten):
 
 def redrawGame():
     #GAME LOOP DRAWING
-
     #--------------------terrain drawing
     for gameObject in gameObjects:
         gameObject.draw(win)
+    if not bullet == None and bullet.collisionDetection():
+        bulletHit()
 
     #-------------------Controlbar and contents of controlbar
     pygame.draw.rect(win, menuBarColor, (0,0, w_width, menuBarHeight))
@@ -289,14 +261,12 @@ def redrawGame():
     message_to_screen("FIRE", red, 25, (750, 25))
 
     #--Draw a projectile
-    if projectileGoing:
-        pygame.draw.circle(win, black, calculateProjectilePosition(), 1)
+
     #--------------------tank and other drawings 
-    for Tank in playerObjects:
-        if Tank.tLp > 0:
-            pygame.draw.ellipse(win, Tank.tcolor, (Tank.tx,Tank.ty,Tank.twidth,Tank.theight), 0)
-            pygame.draw.ellipse(win, Tank.tcolor, (int(Tank.tx + (Tank.twidth-Tank.turretwidth)/2), Tank.ty-Tank.turretheight+5 ,Tank.turretwidth,Tank.turretheight),0)
-            pygame.draw.line(win, Tank.tcolor, ((Tank.tx+int(Tank.twidth/2), Tank.ty)), Tank.calculateTurretEndPos(), Tank.turretThickness)
+
+    for tank in playerObjects:
+        tank.draw(win)
+
     
     pygame.display.update()
     
@@ -340,8 +310,7 @@ def gameLoop():
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_SPACE]:
-            if not projectileGoing:
-                fire()
+            fire()
 
         if keys[pygame.K_0]:
             nextPlayer()

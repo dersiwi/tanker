@@ -29,3 +29,7 @@
 -Rundenende schreiben (aufgehört bei Line 154, Waffenmechanik und Shop)
 
 -Fabren für Panzer 
+
+#-------------------------TODOS since redo
+
+- collision objects for projectiles 

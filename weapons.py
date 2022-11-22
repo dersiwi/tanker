@@ -25,6 +25,8 @@ class Weapon():
     def getBigBall():
         return BigBall()
 
+    
+
 
 class SmallMissile(Weapon):
     def __init__(self):
@@ -42,3 +44,4 @@ class BigBall(Weapon):
     def __init__(self):
         super().__init__(name="Big Ball", damage=300, amount=10, explosionRadius=300)
         
+
