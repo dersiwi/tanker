@@ -1,8 +1,9 @@
 import pygame
 import math
 import random
-from tankClass import Tank
-from terrainClass import Terrain
+#from tankClass import Tank
+#from terrainClass import terrain
+from playerObjects import Terrain, Sun, Tank
 pygame.init()
 
 
@@ -24,9 +25,8 @@ grey = (110,110,110)
 forest_green = (34,139,34)
 skyblue = (176,226,255)
 
-#Terrain initialisation
-Terrain = Terrain(w_width, w_height)
-#Terrain.generate(0)
+
+#terrain.generate(0)
 '''
 Tank = Tank(100,100, black, w_width)
 '''
@@ -41,21 +41,21 @@ menuRun = True              #needs to be a global variable
 gotoGame = False            #this is only used to close the while loop without quitting pygame
 terrainSelected = False     #this is so the player can only play if he selected a terrain Type 
 terrainTypeSelected = 404   #this is the default value if anything hasent been specified yet
-#menu spcifications Terrain Block
-terrainBlockX = 150         #X-Koordinaten Terrainblock
-terrainBlockY = 250         #y-koordinaten der Terrainüberschrift
-dTerrainBlock = 30
-fontSizeTerrainTitle = 30   #überschrift für Terrains
-fontSizeTerrains = 24       #Die Terraintypes selbst; %2=0 sollte gelten; font size 24 ~= 32 px
+#menu spcifications terrain Block
+terrainBlockX = 150         #X-Koordinaten terrainblock
+terrainBlockY = 250         #y-koordinaten der terrainüberschrift
+dterrainBlock = 30
+fontSizeterrainTitle = 30   #überschrift für terrains
+fontSizeterrains = 24       #Die terraintypes selbst; %2=0 sollte gelten; font size 24 ~= 32 px
 bulletpointRadius = 6       #sollte mit 1.5 mulipliziert eine ganze Zahl seinn
 colorSelected = red         #das ist die font farbe für das ausgewählte terrain
 
-terrainBlock = [["Terraintype", black, fontSizeTerrainTitle, (terrainBlockX, int(terrainBlockY))],
-                ["Woods", black, fontSizeTerrains, (terrainBlockX, int(terrainBlockY + dTerrainBlock * 2))],
-                ["Dessert", black, fontSizeTerrains, (terrainBlockX, int(terrainBlockY + dTerrainBlock*3))],
-                ["Random", black, fontSizeTerrains, (terrainBlockX, int(terrainBlockY + dTerrainBlock*4))]]
+terrainBlock = [["terraintype", black, fontSizeterrainTitle, (terrainBlockX, int(terrainBlockY))],
+                ["Woods", black, fontSizeterrains, (terrainBlockX, int(terrainBlockY + dterrainBlock * 2))],
+                ["Dessert", black, fontSizeterrains, (terrainBlockX, int(terrainBlockY + dterrainBlock*3))],
+                ["Random", black, fontSizeterrains, (terrainBlockX, int(terrainBlockY + dterrainBlock*4))]]
 
-#["Woods", black, fontSizeTerrains, (x, y), (x-center-circle, y-center-circle)
+#["Woods", black, fontSizeterrains, (x, y), (x-center-circle, y-center-circle)
 
 playButtonCoordinates = (int(w_width * 8/10), int(w_height * 6/10))        #font-size: 40
 
@@ -65,6 +65,14 @@ playerAmount = 2            #the number of players
 playerObjects = []          #stores every Player object 
 playerTurn = 0              #Stores the index of the current player objects turn (if its player 1s turn its 0)
 
+gameObjects = []
+currentPlayer = None
+
+terrain = Terrain(w_width, w_height)
+terrain.generate(terrainTypeSelected)
+sun = Sun(w_width, w_height)
+gameObjects.append(terrain)
+gameObjects.append(sun)
 
 #--------------------Drawing Variables (GameLoop)
 
@@ -97,12 +105,12 @@ def checkMouseClickMenu(pos):
 
     selection = 404
     if x > terrainBlockX and x < terrainBlockX + 90:
-        if y > terrainBlockY + dTerrainBlock * 2 and y < terrainBlockY + dTerrainBlock * 4 + 20:
-            if y > terrainBlockY + dTerrainBlock * 2 and y < terrainBlockY + dTerrainBlock * 2 + 20:
+        if y > terrainBlockY + dterrainBlock * 2 and y < terrainBlockY + dterrainBlock * 4 + 20:
+            if y > terrainBlockY + dterrainBlock * 2 and y < terrainBlockY + dterrainBlock * 2 + 20:
                 selection = 0
-            if y > terrainBlockY + dTerrainBlock * 3 and y < terrainBlockY + dTerrainBlock * 3 + 20:
+            if y > terrainBlockY + dterrainBlock * 3 and y < terrainBlockY + dterrainBlock * 3 + 20:
                 selection = 1
-            if y > terrainBlockY + dTerrainBlock * 4 and y < terrainBlockY + dTerrainBlock * 4 + 20:
+            if y > terrainBlockY + dterrainBlock * 4 and y < terrainBlockY + dterrainBlock * 4 + 20:
                 selection = 2
         
             if selection == 0 or selection == 1 or selection == 2:
@@ -134,15 +142,15 @@ def checkMouseClickGame(pos):
     #"Change Weapon", black, 20, (410, 25)
     if x >= 410 and x < 410 + 120:
         if y >= 25 and y <= 25+25:
-            playerObjects[playerTurn].changeWeapon()
+            currentPlayer.changeWeapon()
             
     #message_to_screen("More", black, 20,(600, 10))
     #message_to_screen("Less", black, 20,(600, 40))
     if x > 600 and x < 600+50:
         if y > 10 and y < 10 + 25:
-            playerObjects[playerTurn].changeV(1)
+            currentPlayer.changeV(1)
         if y > 40 and y < 40 + 25:
-            playerObjects[playerTurn].changeV(-1)
+            currentPlayer.changeV(-1)
 
     #message_to_screen("FIRE", red, 25, (750, 25))
     if x > 750 and x < 750 + 50:
@@ -156,7 +164,7 @@ def checkMouseClickShopMenu(pos):
     pass
 
 def nextPlayer():
-    global playerTurn, gotoMenu, runGameLoop
+    global playerTurn, gotoMenu, runGameLoop, currentPlayer
     amountLiving = 0
     for Tank in playerObjects:
         if Tank.tLp > 0:
@@ -172,24 +180,25 @@ def nextPlayer():
         playerTurn = 0 
     else:
         playerTurn += 1
+    currentPlayer = playerObjects[playerTurn]
 
     #this ensures that no dead player can have turns
-    if playerObjects[playerTurn].tLp <= 0:
+    if currentPlayer.tLp <= 0:
         nextPlayer()
 
 def fire():
     global projectileGoing, bulletPosition, SpeedRoundX, SpeedRoundY
-    playerObjects[playerTurn].fire()
+    currentPlayer.fire()
     projectileGoing = True
-    pos = playerObjects[playerTurn].calculateTurretEndPos()
+    pos = currentPlayer.calculateTurretEndPos()
     
     
     bulletPosition[0] = pos[0]
     bulletPosition[1] = pos[1]
 
-    angle = playerObjects[playerTurn].turretAngle
-    SpeedRoundY = playerObjects[playerTurn].v0
-    SpeedRoundX = int(round(playerObjects[playerTurn].v0 * math.cos(angle*180/math.pi)))
+    angle = currentPlayer.turretAngle
+    SpeedRoundY = currentPlayer.v0
+    SpeedRoundX = int(round(currentPlayer.v0 * math.cos(angle*180/math.pi)))
     
 def calculateProjectilePosition():
     #errechnet die FLugbahn eines Projektils
@@ -201,7 +210,7 @@ def calculateProjectilePosition():
     return (bulletPosition[0],bulletPosition[1])
 
 def checkForBulletCollision():
-    #Kollisoinskontrolle für die Kanonenkugel mit dem Terrain und anderen Pnazern
+    #Kollisoinskontrolle für die Kanonenkugel mit dem terrain und anderen Pnazern
     global projectileGoing
     if bulletPosition[0] > w_width or bulletPosition[0] < 0:
         projectileGoing = False
@@ -212,20 +221,20 @@ def checkForBulletCollision():
     for Tank in playerObjects:
         if bulletPosition[0] > Tank.tx and bulletPosition[0] < Tank.tx+Tank.twidth:
             if bulletPosition[1] > Tank.ty-5 and bulletPosition[1] < Tank.ty + 2* Tank.theight:
-                Tank.tLp -= playerObjects[playerTurn].weapons[playerObjects[playerTurn].currentWeapon][3]
-                Terrain.explosion(bulletPosition[0], playerObjects[playerTurn].weapons[playerObjects[playerTurn].currentWeapon][1])
+                Tank.tLp -= currentPlayer.weapons[currentPlayer.currentWeapon][3]
+                terrain.explosion(bulletPosition[0], currentPlayer.weapons[currentPlayer.currentWeapon][1])
                 projectileGoing = False
                 nextPlayer()
 
-    #kollisionskontrolle mit dem Terrain
-    if bulletPosition[1] >= w_height-Terrain.yWerte[bulletPosition[0]]:
-        explosionRadius = playerObjects[playerTurn].weapons[playerObjects[playerTurn].currentWeapon][1]
-        Terrain.explosion(bulletPosition[0], explosionRadius)
+    #kollisionskontrolle mit dem terrain
+    if bulletPosition[1] >= w_height-terrain.yWerte[bulletPosition[0]]:
+        explosionRadius = currentPlayer.weapons[currentPlayer.currentWeapon][1]
+        terrain.explosion(bulletPosition[0], explosionRadius)
         projectileGoing = False
         #schadensverwaltung für panzer im umkreis der Explosion
         for Tank in playerObjects:
             if Tank.tx > bulletPosition[0] - explosionRadius and Tank.tx < bulletPosition[0] + explosionRadius:
-                Tank.tLp -= int(playerObjects[playerTurn].weapons[playerObjects[playerTurn].currentWeapon][3]/2)
+                Tank.tLp -= int(currentPlayer.weapons[currentPlayer.currentWeapon][3]/2)
         nextPlayer()
 
 
@@ -241,39 +250,37 @@ def message_to_screen(msg, color, fontSize, fontKoordinaten):
 def redrawGame():
     #GAME LOOP DRAWING
 
-    #--------------------Terrain drawing
-    for x in range(w_width):
-        pygame.draw.line(win, Terrain.color, (x+1, w_height), (x+1, w_height-Terrain.yWerte[x]), 1)
-    Terrain.drawSun(win)
-    
+    #--------------------terrain drawing
+    for gameObject in gameObjects:
+        gameObject.draw(win)
 
     #-------------------Controlbar and contents of controlbar
     pygame.draw.rect(win, menuBarColor, (0,0, w_width, menuBarHeight))
     pygame.draw.line(win, (240,248,255), (0,menuBarHeight+1), (w_width, menuBarHeight+1), 0)
 
     #--drawing the current player
-    pygame.draw.ellipse(win, playerObjects[playerTurn].tcolor, (0, playerObjects[playerTurn].turretheight, playerObjects[playerTurn].twidth, playerObjects[playerTurn].theight), 0)
-    pygame.draw.ellipse(win, playerObjects[playerTurn].tcolor, (int((playerObjects[playerTurn].twidth-playerObjects[playerTurn].turretwidth)/2), 5,playerObjects[playerTurn].turretwidth,playerObjects[playerTurn].turretheight),0)
-    message_to_screen(str(playerObjects[playerTurn].playerNumber), black, 20, (playerObjects[playerTurn].twidth+5,0))
+    pygame.draw.ellipse(win, currentPlayer.tcolor, (0, currentPlayer.turretheight, currentPlayer.twidth, currentPlayer.theight), 0)
+    pygame.draw.ellipse(win, currentPlayer.tcolor, (int((currentPlayer.twidth-currentPlayer.turretwidth)/2), 5,currentPlayer.turretwidth,currentPlayer.turretheight),0)
+    message_to_screen(str(currentPlayer.playerNumber), black, 20, (currentPlayer.twidth+5,0))
 
     #--the fuel and the left and right buttons
-    message_to_screen(str("Fuel: " + str(playerObjects[playerTurn].fuel)), black, 20, (playerObjects[playerTurn].twidth+5, 15))
+    message_to_screen(str("Fuel: " + str(currentPlayer.fuel)), black, 20, (currentPlayer.twidth+5, 15))
     #left button is missing
     #right button is missing
 
     #--Livepoints
-    message_to_screen(str("LP: " + str(playerObjects[playerTurn].tLp)), black, 20, (playerObjects[playerTurn].twidth+5, 30))
+    message_to_screen(str("LP: " + str(currentPlayer.tLp)), black, 20, (currentPlayer.twidth+5, 30))
 
     #--Weapons and Amount
-    stringWeapons = str(playerObjects[playerTurn].weapons[playerObjects[playerTurn].currentWeapon][2]) + " : "
-    stringWeapons += str(playerObjects[playerTurn].weapons[playerObjects[playerTurn].currentWeapon][0])
+    stringWeapons = str(currentPlayer.weapons[currentPlayer.currentWeapon][2]) + " : "
+    stringWeapons += str(currentPlayer.weapons[currentPlayer.currentWeapon][0])
     message_to_screen(stringWeapons, black, 20, (400,5))
 
     #--cahngeWeaponButton
     message_to_screen("Change Weapon", grey, 20, (410, 25))
 
     #change v0-Projectile Buttons
-    message_to_screen(str("Force: " + str(playerObjects[playerTurn].v0)), black, 20,(600, 25))
+    message_to_screen(str("Force: " + str(currentPlayer.v0)), black, 20,(600, 25))
     message_to_screen("More", black, 20,(600, 10))
     message_to_screen("Less", black, 20,(600, 40))
 
@@ -296,12 +303,12 @@ def redrawMenu():
     #MENU DRAWING
     message_to_screen("TANKER", red, 50, (int(w_width/2-80),int(w_height/5)))
     message_to_screen("PLAY", green, 40, playButtonCoordinates)
-    #Terrain Block
+    #terrain Block
     for x in range(len(terrainBlock)):
         message_to_screen(terrainBlock[x][0],terrainBlock[x][1],terrainBlock[x][2],terrainBlock[x][3])
     #circle(surface, color, center, radius)
     #for x in range(2,5):
-    #    pygame.draw.circle(win, black, (int(terrainBlockX-fontSizeTerrains/2), terrainBlockY +dTerrainBlock * x + int(bulletpointRadius*1.5)) ,bulletpointRadius)
+    #    pygame.draw.circle(win, black, (int(terrainBlockX-fontSizeterrains/2), terrainBlockY +dterrainBlock * x + int(bulletpointRadius*1.5)) ,bulletpointRadius)
     pygame.display.update()
 
 def redrawShopMenu():
@@ -315,13 +322,14 @@ def redrawShopMenu():
 #---------------------------------MAIN GAME LOOP--------------------------------  
 def gameLoop():
     global Tank
-    global Terrain
+    global terrain
+    runGameLoop = True
     while runGameLoop:
         pygame.time.delay(100)      #100 ms = 10 FPS
             
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                run = False
+                runGameLoop = False
             #checkMouseClickGame(pos)
             if event.type == pygame.MOUSEBUTTONDOWN:
                 checkMouseClickGame(pygame.mouse.get_pos())
@@ -338,26 +346,26 @@ def gameLoop():
             nextPlayer()
             
         if keys[pygame.K_LEFT]:
-            playerObjects[playerTurn].move(-1, Terrain.yWerte)
+            currentPlayer.move(-1, terrain.yWerte)
                 
         if keys[pygame.K_RIGHT]:
-            playerObjects[playerTurn].move(1, Terrain.yWerte)
+            currentPlayer.move(1, terrain.yWerte)
             
         if keys[pygame.K_UP]:
-            playerObjects[playerTurn].turretAngle += 1
+            currentPlayer.turretAngle += 1
             
         if keys[pygame.K_DOWN]:
-            playerObjects[playerTurn].turretAngle -= 1
+            currentPlayer.turretAngle -= 1
             #change player)
 
         win.fill(skyblue)
         for Tank in playerObjects:
             if Tank.ty < w_height:
-                if Tank.ty < w_height-(Terrain.yWerte[Tank.tx] + Tank.theight -5):
+                if Tank.ty < w_height-(terrain.yWerte[Tank.tx] + Tank.theight -5):
                     Tank.ty += Tank.ySpeed
                     Tank.ySpeed += gravity
                 else:
-                    Tank.ty = w_height-(Terrain.yWerte[Tank.tx] + Tank.theight - 5)
+                    Tank.ty = w_height-(terrain.yWerte[Tank.tx] + Tank.theight - 5)
                     #Tank.tLp -= Tank.ySpeed
                     Tank.ySpeed = 0
                     
@@ -365,7 +373,7 @@ def gameLoop():
                 Tank.tLp = 0
 
         #das ist nur eine Provisorische Abfrage um bugs uz vermeiden
-        if playerObjects[playerTurn].tLp == 0:
+        if currentPlayer.tLp == 0:
             nextPlayer()
         redrawGame()
 
@@ -417,16 +425,18 @@ def menu():
 
 #---------------------------------MAIN FUNCTION------------------------------------
 def main():
+    global currentPlayer
     startMenu()
 
     
     #gameInitialisation
-    Terrain.generate(terrainTypeSelected)
+
     
     for x in range(playerAmount):
         randomX = random.randint(0, 740)
         T = Tank(randomX,100, black, w_width, x+1)
         playerObjects.append(T)
+    currentPlayer = playerObjects[0]
 
     game = True
     while game:

@@ -103,8 +103,9 @@ class Tank:
         
         
     def draw(self, window):
-        pygame.draw.ellipse(window, self.tcolor, (0, self.turretheight, self.twidth, self.theight), 0)
-        pygame.draw.ellipse(window, self.tcolor, (int((self.twidth-self.turretwidth)/2), 5, self.turretwidth, self.turretheight),0)
+        pygame.draw.ellipse(window, self.tcolor, (self.tx,self.ty,self.twidth,self.theight), 0)
+        pygame.draw.ellipse(window, self.tcolor, (int(self.tx + (self.twidth-self.turretwidth)/2), self.ty-self.turretheight+5 ,self.turretwidth,self.turretheight),0)
+        pygame.draw.line(window, self.tcolor, ((self.tx+int(self.twidth/2), self.ty)), self.calculateTurretEndPos(), self.turretThickness)
     
 
 
@@ -120,7 +121,7 @@ class Sun(PlayerObject):
         pygame.draw.circle(window, self.sunColor, self.sunCoordinates, self.sunRadius)
 
 
-class Terrain(PlayerObject):
+class Terrain:
     def __init__(self, screenWidth, screenHeight):
         self.screenWidth = screenWidth
         self.screenHeight = screenHeight
@@ -182,6 +183,6 @@ class Terrain(PlayerObject):
             raise ValueError("Y-Values have not been calculated yet. Call Terrain.generate() beforehand.")
 
         for x in range(self.screenWidth):
-            pygame.draw.line(window, Terrain.color, (x+1, self.screenHeight), (x+1, self.screenHeight-self.yWerte[x]), 1)
+            pygame.draw.line(window, self.color, (x+1, self.screenHeight), (x+1, self.screenHeight-self.yWerte[x]), 1)
     
 
