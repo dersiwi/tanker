@@ -6,6 +6,9 @@ class Weapon():
         self.amout = amount
         self.damage = damage
         self.explosionRadius = explosionRadius
+    
+    def decrementAmount(self):
+        self.amount -= 1
 
     def getSmallMissile():
         return SmallMissile()

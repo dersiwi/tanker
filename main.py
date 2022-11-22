@@ -244,7 +244,8 @@ def redrawGame():
     #--------------------Terrain drawing
     for x in range(w_width):
         pygame.draw.line(win, Terrain.color, (x+1, w_height), (x+1, w_height-Terrain.yWerte[x]), 1)
-    pygame.draw.circle(win, Terrain.sunColor, Terrain.sunCoordinates, Terrain.sunRadius)
+    Terrain.drawSun(win)
+    
 
     #-------------------Controlbar and contents of controlbar
     pygame.draw.rect(win, menuBarColor, (0,0, w_width, menuBarHeight))

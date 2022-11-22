@@ -1,5 +1,7 @@
 import math
 import random
+import pygame
+
 class Terrain:
     def __init__(self, screenWidth, screenHeight):
         self.screenWidth = screenWidth
@@ -61,4 +63,8 @@ class Terrain:
             for xV in range(0, x+r):
                 distance_to_center = abs(x-xV)
                 self.yWerte[xV] = int(yExplosion - round(math.sqrt(r**2 - distance_to_center**2)))
+    
+
+    def drawSun(self, window):
+        pygame.draw.circle(window, self.sunColor, self.sunCoordinates, self.sunRadius)
             
