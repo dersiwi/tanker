@@ -18,7 +18,7 @@ The game is round based. Meaning only one player can do actions at a time. A pla
 leaves the canvas or hits something. 
 
 <p align="center">
-    <img width="600" src="https://github.com/dersiwi/tanker/blob/main/images/gameDemo-23112022-1.png" alt="Gameplay Screenshot, 23.11.2022">
+    <img width="600" src="https://github.com/dersiwi/tanker/blob/main/images/gameDemo-23112022-2.png" alt="Gameplay Screenshot, 23.11.2022">
     <br>
     Gameplay Screenshot, 23.11.2022
 </p>

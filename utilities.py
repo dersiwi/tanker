@@ -19,6 +19,15 @@ class Colors:
     forest_green = (34,139,34)
     skyblue = (176,226,255)
 
+    playerPurple = (127, 0, 255)
+    playerTourquise = (0, 153, 153)
+    playerYellow = (255, 255, 51)
+    playerRed = (255, 51, 51)
+
+    playerColors = [playerPurple, playerTourquise, playerYellow, playerRed]
+
+
+
 
 
 class TextButton:

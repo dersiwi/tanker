@@ -1,8 +1,11 @@
-from playerObjects import Terrain, Tank, Sun, Projectile
+from playerObjects import Terrain, Sun
+from projectile import Projectile
 from utilities import message_to_screen, Colors, TextButton
 
 import pygame
 import math
+
+
 
 
 """
@@ -15,6 +18,10 @@ import math
     The game-class has a run method which actually runs the game-loop, draws all objcets
 """
 class Game:
+
+    clock = pygame.time.Clock()
+    FPS = 30
+    dt = 1 / FPS
 
     def __init__(self, window, w_width, w_height, terrainType):
 
@@ -44,7 +51,8 @@ class Game:
         self.projectile = None
 
         #--------------constants
-        self.gravity = 5
+
+        self.gravity = 5 * Game.FPS
 
         
 
@@ -52,6 +60,7 @@ class Game:
     def setPlayerTanks(self, playerTanks):
         for tank in playerTanks:
             self.playerTanks.append(tank)
+            tank.dt = Game.dt
         self.currentPlayer = self.playerTanks[self.playerTurn]
 
     
@@ -105,7 +114,7 @@ class Game:
         angle = self.currentPlayer.turretAngle
         SpeedRoundY = self.currentPlayer.v0
         SpeedRoundX = int(round(self.currentPlayer.v0 * math.cos(angle*180/math.pi)))
-        self.projectile = Projectile(pos[0], pos[1], SpeedRoundX, SpeedRoundY, self.terrain, self.gravity, self.currentPlayer.getCurrentWeapon(), self.playerTanks)
+        self.projectile = Projectile(pos[0], pos[1], SpeedRoundX, SpeedRoundY, self.terrain, self.gravity, self.currentPlayer.getCurrentWeapon(), self.playerTanks, Game.dt)
         self.gameObjects.append(self.projectile)
 
     """
@@ -153,7 +162,6 @@ class Game:
     def gameLoop(self):
         self.runGameLoop = True
         while self.runGameLoop:
-            pygame.time.delay(100)      #100 ms = 10 FPS
                 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -174,7 +182,7 @@ class Game:
                 if tank.ty < self.w_height:
                     if tank.ty < self.w_height-(self.terrain.yWerte[tank.tx] + tank.theight -5):
                         tank.ty += tank.ySpeed
-                        tank.ySpeed += self.gravity
+                        tank.ySpeed += int(self.gravity * Game.dt)
                     else:
                         tank.ty = self.w_height-(self.terrain.yWerte[tank.tx] + tank.theight - 5)
                         #Tank.tLp -= Tank.ySpeed
@@ -183,7 +191,7 @@ class Game:
                 else:
                     tank.tLp = 0
             
-
+            Game.clock.tick(Game.FPS)
 
             #das ist nur eine Provisorische Abfrage um bugs uz vermeiden
             if self.currentPlayer.tLp == 0:
