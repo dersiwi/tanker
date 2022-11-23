@@ -1,8 +1,10 @@
 
 from weapons import Weapon
 import math
-
+from fpsConstants import FPS
 from pygame.draw import ellipse, line
+
+
 
 class Tank:
     def __init__(self, tx, ty, color, screenwidth, playerNumber):
@@ -13,7 +15,7 @@ class Tank:
         self.theight = 8                    #used for drawing the tank: height of the bottom ellipse
         self.tcolor = color                 #the tanks color
         self.ySpeed = 0                     #the tanks vertical speed, only used for gravity
-        self.tSpeed = 150                     #the tanks speedS
+        self.tSpeed = 3 * FPS.FPS           #the tanks speedS
         self.tLp = 100                      #the tanks livepoints
         self.fuel = 500                     #the fuel for each round
         self.scorePoints = 0                #you can buy stuff with those, also they represent your score
@@ -29,15 +31,14 @@ class Tank:
         #self.turretStartingPosition = (self.tx+int(self.twidth/2), self.ty)    da die x und y posiition ständig verändert wird ist diese variable irrelevant
         self.turretLength = 15
         self.turretThickness = 2
-        self.v0 = 50*30
+        self.v0 = 15 * FPS.FPS
         self.v0ChangePerClick = 100
-        self.v0Max = 70*30
+        self.v0Max = 50 * FPS.FPS
 
         self.maximumSlopeCrossable = 100000
 
         self.screen_width = screenwidth
 
-        self.dt = 1  
 
         
     def movementPossible(self, yWerte):
@@ -53,7 +54,7 @@ class Tank:
     def move(self, leftRight, yWerteTerrain):
         #leftRight is either 1 or -1 to multiply the movement
         if self.movementPossible(yWerteTerrain) and self.tx + self.tSpeed <= self.screen_width - self.twidth and self.fuel >= self.fuelPerMove:
-                self.tx +=  int(self.tSpeed * leftRight * self.dt)
+                self.tx +=  int(self.tSpeed * leftRight * FPS.dt)
                 self.fuel -= self.fuelPerMove
     
     def fire(self):

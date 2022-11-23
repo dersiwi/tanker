@@ -1,5 +1,6 @@
 from playerObjects import PlayerObject
 from pygame.draw import circle
+from fpsConstants import FPS
 
 class Projectile(PlayerObject):
     #collisionObjects are added in here, such that later on the bullet can perform collision detection on these objects as well (e.g. trees or something)
@@ -10,15 +11,14 @@ class Projectile(PlayerObject):
         self.weapon = weapon    #the weapon from which the bullet was fired
         self.gravity = gravity
 
-        self.dt = dt
 
         self.collisionObjects = collisionObjects #for now this HAS to be all the tanks (=playerObjects), in the future this can become an abstract interface
 
     
 
     def updatePosition(self):
-        self.x += int(self.xSpeed * self.dt)
-        self.y -= int(self.ySpeed * self.dt)
+        self.x += int(self.xSpeed * FPS.dt)
+        self.y -= int(self.ySpeed * FPS.dt)
         self.ySpeed -= self.gravity
 
     def getProjectilePosition(self):
