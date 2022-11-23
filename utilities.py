@@ -15,6 +15,7 @@ class Colors:
     red = (255,0,0)
     blue = (0,0,255)
     green = (0,255,0)
+    orange = (255, 165, 0)
     grey = (110,110,110)
     forest_green = (34,139,34)
     skyblue = (176,226,255)

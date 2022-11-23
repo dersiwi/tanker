@@ -198,6 +198,7 @@ class Game:
             self.redrawGame()
 
         pygame.quit()
+        print("I am very sorry, the restart of the game has not yet been implemetned. Still, i hope you had fun:)")
     
 
 

@@ -6,6 +6,7 @@ from pygame.draw import ellipse, line
 
 
 
+
 class Tank:
     def __init__(self, tx, ty, color, screenwidth, playerNumber):
         self.tx = tx
@@ -38,6 +39,9 @@ class Tank:
         self.maximumSlopeCrossable = 100000
 
         self.screen_width = screenwidth
+
+
+        self.points = 0
 
 
         

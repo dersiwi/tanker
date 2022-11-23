@@ -32,6 +32,7 @@ class Terrain:
         self.sand = (219,209,180)
         
         self.color = self.sand      #the terrain color   
+        self.explosions = []        #list of explosion objects, that have to be drawn
 
         
     def generate(self, terrainType):
@@ -83,6 +84,13 @@ class Terrain:
 
         for x in range(self.screenWidth):
             pygame.draw.line(window, self.color, (x, self.screenHeight), (x, self.screenHeight-self.yWerte[x]), 1)
+
+        #draw any explosions on the terrain
+        for explosion in self.explosions:
+            explosion.draw(window)
+            explosion.frames -= 1
+            if explosion.frames <= 0:
+                self.explosions.remove(explosion)
 
 
 #-------------------------------------------------------------_TERRAIN AND SUN------------------------------------

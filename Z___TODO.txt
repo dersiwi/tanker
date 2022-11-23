@@ -1,35 +1,65 @@
----------------------------DESIGN UND AUSSEHEN------------------------
+---------------------------DESIGN------------------------
 
--Hintergrundbilder: Menü und für einzelne Terrains
---Hintergrundbild Menü animieren
---Hintergundbilder Terrains animieren
 
--Menü: Schriftart, Schriftfarbe und Platzierung verschönern
+- Starting Menu :
+        -- improve placing and looks of buttons
+        -- animate background
+        -- choose amout players
+        -- choose color (and name) for each player
 
--Verschiedene Terrainfunktionen bereitstellen 
+- Terrain :
+        -- Create different terrain functions
 
--Animation für unterschiedliche Waffen
+- weapons :
+        -- animations for different weapon-types
 
--Panzerdesign überarbeiten
--------------------------SPIELMECHANIK--------------------------------
+-tank design
 
--Schaden für Panzer bei Explosion
+-------------------------INTERNAL DEVELOPMENT -----------------------
 
--Rundensystem implementieren
+- destinguish between Player and Tank 
+        -- Every Player has a Tank and every Tank has a Player
 
--Shop nach Abgeschlossener Runde implementieren
---Rundensystem muss auch für Shop gelten
 
--Panzer KI
+-------------------------GAME MECHANIC--------------------------------
+
+-Damage dealt on tanks 
+
+- point-system after dealing damage to other tanks
+
+
+- Shop after each round 
 
 -Datenübersicht von Spieler (Aktueller Winkel)
 
--Spawnsystem überarbeiten
+-Spawnsystem 
+    --player have to be more spaced out
 
--Rundenende schreiben (aufgehört bei Line 154, Waffenmechanik und Shop)
 
--Fabren für Panzer 
 
 #-------------------------TODOS since redo
 
 - collision objects for projectiles 
+
+
+#-------------------------FUTURE IDEAS
+
+
+- Sound?
+- Fall damage for tanks
+
+- Add-Ons for tanks
+    -- Teleportation
+    -- Parashute
+    -- shield 
+
+
+
+- Basic Tank AI
+    -- Random AI
+    -- an AI that shoots somewhere in a 5-width tank radius around its target
+    -- badass AI
+
+
+- Different Gamemodes
+    --Level-Campaign with different levels, storable progress, etc.
