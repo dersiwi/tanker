@@ -1,6 +1,5 @@
 import pygame
-from utilities import message_to_screen
-from colors import Colors
+from utilities import message_to_screen, Colors
 
 class MenuBar:
     def __init__(self, screenWidth, screenHeight):

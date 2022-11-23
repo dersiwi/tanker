@@ -1,6 +1,5 @@
 import pygame
-from utilities import message_to_screen
-from colors import Colors
+from utilities import message_to_screen, TextButton,Colors
 
 class StartMenu:
     
@@ -28,6 +27,16 @@ class StartMenu:
         self.runMenuBool = True
         self.gotoGame = True
 
+        self.playButton = TextButton(
+            x = int(screenWidth * 8/10),
+            y = int(screenHeight * 6/10),
+            text = "PLAY",
+            width = 144,
+            height = 30,
+            fontSize = 40,
+            color=Colors.green
+            )
+
     def checkMouseClick(self, pos):
         #this function checks if the mouse clicked any buttons and executes the corresponding action
         x = pos[0]
@@ -44,7 +53,6 @@ class StartMenu:
                     selection = 2
             
                 if selection == 0 or selection == 1 or selection == 2:
-                    terrainSelected = True
                     for x in range(1,len(self.terrainBlock)):
                         self.terrainBlock[x][1] = Colors.black
                     if selection == 0:
@@ -57,15 +65,15 @@ class StartMenu:
                         self.terrainBlock[3][1] = self.colorSelected
                         self.terrainTypeSelected = 2
 
-        if x > self.playButtonCoordinates[0] and self.playButtonCoordinates[0] + 144:
-            if y > self.playButtonCoordinates[1] and  y < self.playButtonCoordinates[0] + 30:
-                if not self.terrainTypeSelected == None:
-                    self.runMenuBool = False
+        if self.playButton.isClicked(pos):
+            self.runMenuBool = False
 
     def drawMenu(self, win):
             #MENU DRAWING
         message_to_screen(win, "TANKER", Colors.red, 50, (int(self.screenWidth/2-80),int(self.screenHeight/5)))
-        message_to_screen(win, "PLAY", Colors.green, 40, self.playButtonCoordinates)
+        self.playButton.draw(win)
+        #message_to_screen(win, "PLAY", Colors.green, 40, (int(self.screenWidth * 8/10),int(self.screenHeight * 6/10)))
+        
         #terrain Block
         for x in range(len(self.terrainBlock)):
             message_to_screen(win, self.terrainBlock[x][0], self.terrainBlock[x][1], self.terrainBlock[x][2], self.terrainBlock[x][3])

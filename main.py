@@ -5,9 +5,8 @@ import random
 #from terrainClass import terrain
 from playerObjects import Terrain, Sun, Tank, Projectile
 from menubar import MenuBar
-from colors import Colors
 from startmenu import StartMenu
-from utilities import message_to_screen
+from utilities import message_to_screen, Colors
 pygame.init()
 
 
@@ -69,34 +68,26 @@ shopBlock = ["Small Atom Bomb", 10000, 1, 20, Colors.black, (40,40)]
 #shopBlock = ["Name", cost, amountPerBuy, fontSize, fonColor, (x-position, y-position)]
 
 #----------------------FUNCTIONAL FUNCTIONS------------------------------------
-    #int(w_width * 8/10), int(w_height * 6/10)
 
 def checkMouseClickGame(pos):
     x = pos[0]
     y = pos[1]
 
-    #"Change Weapon", black, 20, (410, 25)
     if x >= 410 and x < 410 + 120:
         if y >= 25 and y <= 25+25:
             currentPlayer.changeWeapon()
             
-    #message_to_screen("More", black, 20,(600, 10))
-    #message_to_screen("Less", black, 20,(600, 40))
     if x > 600 and x < 600+50:
         if y > 10 and y < 10 + 25:
             currentPlayer.changeV(1)
         if y > 40 and y < 40 + 25:
             currentPlayer.changeV(-1)
 
-    #message_to_screen("FIRE", red, 25, (750, 25))
     if x > 750 and x < 750 + 50:
         if y > 25 and y < 25 + 30:
             fire()
 
-def checkMouseClickShopMenu(pos):
-    x = pos[0]
-    y = pos[1]
-    pass
+            
 
 def nextPlayer():
     global playerTurn, gotoMenu, runGameLoop, currentPlayer
@@ -159,10 +150,6 @@ def redrawGame():
 
     menuBar.draw(win, currentPlayer)
     
-
-    #--Draw a projectile
-
-    #--------------------tank and other drawings 
 
     for tank in playerObjects:
         tank.draw(win)
