@@ -235,4 +235,4 @@ class Terrain:
             raise ValueError("Y-Values have not been calculated yet. Call Terrain.generate() beforehand.")
 
         for x in range(self.screenWidth):
-            pygame.draw.line(window, self.color, (x+1, self.screenHeight), (x+1, self.screenHeight-self.yWerte[x]), 1)
+            pygame.draw.line(window, self.color, (x, self.screenHeight), (x, self.screenHeight-self.yWerte[x]), 1)
