@@ -3,8 +3,6 @@ from utilities import message_to_screen, TextButton,Colors
 
 class StartMenu:
     
-
-
     def __init__(self, screenWidth, screenHeight):
         self.screenWidth = screenWidth
         self.screenHeight = screenHeight
@@ -46,7 +44,6 @@ class StartMenu:
             self.resetTerrainButtonColors()
             button.color = self.colorSelected
             self.terrainTypeSelected = valueIfClicked
-            print(self.terrainTypeSelected)
 
     def resetTerrainButtonColors(self):
         for button in self.terrainButtons:

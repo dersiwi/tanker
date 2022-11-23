@@ -6,7 +6,7 @@ import random
 from playerObjects import Terrain, Sun, Tank, Projectile
 from menubar import MenuBar
 from startmenu import StartMenu
-from utilities import message_to_screen, Colors
+from utilities import Colors
 pygame.init()
 
 
@@ -96,7 +96,6 @@ def nextPlayer():
         if Tank.tLp > 0:
             amountLiving += 1
     if amountLiving <= 1:
-        gotoMenu = True
         runGameLoop = False
         return
 
@@ -110,6 +109,7 @@ def nextPlayer():
 
     #this ensures that no dead player can have turns
     if currentPlayer.tLp <= 0:
+        playerObjects.pop(currentPlayer)
         nextPlayer()
 
 def fire():
@@ -152,7 +152,8 @@ def redrawGame():
     
 
     for tank in playerObjects:
-        tank.draw(win)
+        if tank.tLp > 0:
+            tank.draw(win)
 
     
     pygame.display.update()
@@ -217,8 +218,7 @@ def gameLoop():
             nextPlayer()
         redrawGame()
 
-    if gotoMenu == False:
-        pygame.quit()
+    pygame.quit()
     
 
 #---------------------------------MAIN FUNCTION------------------------------------

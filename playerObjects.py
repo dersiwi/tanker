@@ -67,14 +67,14 @@ class Tank:
     
     def move(self, leftRight, yWerteTerrain):
         #leftRight is either 1 or -1 to multiply the movement
-        if self.movementPossible(yWerteTerrain) and self.tx + self.tSpeed <= self.screen_width-self.twidth and self.fuel >= self.fuelPerMove:
+        if self.movementPossible(yWerteTerrain) and self.tx + self.tSpeed <= self.screen_width - self.twidth and self.fuel >= self.fuelPerMove:
                 self.tx +=  int(self.tSpeed * leftRight)
                 self.fuel -= self.fuelPerMove
     
     def fire(self):
         self.getCurrentWeapon().decrementAmount()
         
-        if self.getCurrentWeapon().hasAmmoLeft():
+        if not self.getCurrentWeapon().hasAmmoLeft():
             self.weapons.pop(self.currentWeapon)
     
     def getCurrentWeapon(self):
@@ -236,5 +236,3 @@ class Terrain:
 
         for x in range(self.screenWidth):
             pygame.draw.line(window, self.color, (x+1, self.screenHeight), (x+1, self.screenHeight-self.yWerte[x]), 1)
-    
-

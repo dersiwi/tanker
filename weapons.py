@@ -8,7 +8,7 @@ class Weapon():
         self.explosionRadius = explosionRadius
     
     def decrementAmount(self):
-        self.amount -= 1
+        self.amount = self.amount - 1
     
     def hasAmmoLeft(self):
         return self.amount > 0
