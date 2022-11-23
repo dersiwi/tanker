@@ -42,8 +42,7 @@ class TextButton:
         self.text = text
         self.fontSize = fontSize
         self.color = color
-        print(color)
-
+    
 
     """
         True if the position was inside the bounds of this button
