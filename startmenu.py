@@ -1,5 +1,8 @@
 import pygame
 from utilities import message_to_screen, TextButton,Colors
+from tank import Tank
+from playerObjects import Terrain, Sun
+from fpsConstants import FPS
 
 
 
@@ -18,7 +21,7 @@ class Animation():
         self.maxX = w_width - self.width
     
     def updatePosition(self):
-        self.x += int(self.xSpeed * StartMenu.dt)
+        self.x += int(self.xSpeed * FPS.dt)
         if self.x > self.maxX:
             self.x = 0
     
@@ -27,11 +30,21 @@ class Animation():
         self.updatePosition()
 
 
+class StartMenuBackground:
+    def __init__(self, screenWidth, screenHeight):
+        self.backgroundTerrain = Terrain(screenWidth, screenHeight)
+        self.backgroundTerrain.generate(Terrain.RANDOM)
+        self.backgroundSun = Sun(screenWidth, screenHeight)
+        self.backgroundSun.move()
+
+
+    def draw(self, win):
+        self.backgroundTerrain.draw(win)
+        self.backgroundSun.draw(win)
+
 class StartMenu:
 
     clock = pygame.time.Clock()
-    FPS = 30
-    dt = 1 / FPS
     def __init__(self, screenWidth, screenHeight):
         self.screenWidth = screenWidth
         self.screenHeight = screenHeight
@@ -39,10 +52,10 @@ class StartMenu:
 
 
         self.terrainBlockX = 150
-        self.terrainBlockY = 250
-        self.dterrainBlock = 30
-        self.fontSizeterrains = 24
-        self.fontSizeterrainTitle = 30
+        self.terrainBlockY = 150
+        
+        self.fontSizeterrains = 35
+        self.dterrainBlock = 2 * self.fontSizeterrains
         self.colorSelected = Colors.red 
 
 
@@ -50,6 +63,12 @@ class StartMenu:
         self.terrainTypeDessert = TextButton(self.terrainBlockX, y = int(self.terrainBlockY + self.dterrainBlock * 3), text = "Dessert", fontSize=self.fontSizeterrains)
         self.terrainTypeRandom = TextButton(self.terrainBlockX, y = int(self.terrainBlockY + self.dterrainBlock * 4), text = "Random", fontSize=self.fontSizeterrains)
         self.terrainTypeSelected = None
+        self.terrainButtons = [self.terrainTypeWoods, self.terrainTypeDessert, self.terrainTypeRandom]
+        
+        for button in self.terrainButtons:
+            button.addBorder()
+            button.addBackground()
+            button.setMargin(int(self.fontSizeterrains / 5))
         
         self.runMenuBool = True
         self.gotoGame = True
@@ -61,21 +80,26 @@ class StartMenu:
             fontSize = 40,
             color=Colors.green
             )
-        self.terrainButtons = [self.terrainTypeWoods, self.terrainTypeDessert, self.terrainTypeRandom]
+        self.playButton.addBorder()
+        self.playButton.addBackground()
+        self.playButton.setMargin(10)
+        
         self.buttons = [self.playButton, self.terrainTypeDessert, self.terrainTypeRandom, self.terrainTypeWoods]
 
         self.animation = Animation(screenWidth, screenHeight)
+        self.background = StartMenuBackground(screenWidth, screenHeight)
+
 
 
     def checkForTerrainButtonClick(self, pos, button, valueIfClicked):
         if button.isClicked(pos):
             self.resetTerrainButtonColors()
-            button.color = self.colorSelected
+            button.setBackgroundColor(self.colorSelected)
             self.terrainTypeSelected = valueIfClicked
 
     def resetTerrainButtonColors(self):
         for button in self.terrainButtons:
-            button.color = Colors.black
+            button.setBackgroundColor(Colors.white)
 
     def checkMouseClick(self, pos):
         #this function checks if the mouse clicked any buttons and executes the corresponding action
@@ -88,7 +112,7 @@ class StartMenu:
             
 
     def drawMenu(self, win):
-
+        self.background.draw(win)
         #-----Trying to get an animation to work
         self.animation.draw(win)
         #-----
@@ -114,7 +138,7 @@ class StartMenu:
                     self.checkMouseClick(pygame.mouse.get_pos())
 
             win.fill(Colors.white)
-            StartMenu.clock.tick(StartMenu.FPS)
+            StartMenu.clock.tick(FPS.FPS)
             self.drawMenu(win)
             
         if not self.gotoGame:

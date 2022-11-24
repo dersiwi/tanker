@@ -87,7 +87,11 @@ class TextButton:
         self.hasBorder = True
         self.borderColor = borderColor
 
-    def addBackgroundColor(self, backgroundColor=Colors.white):
+    def addBackground(self, backgroundColor=Colors.white):
+        self.hasBackgroundFilling = True
+        self.backgroundColor = backgroundColor
+
+    def setBackgroundColor(self, backgroundColor):
         self.hasBackgroundFilling = True
         self.backgroundColor = backgroundColor
 

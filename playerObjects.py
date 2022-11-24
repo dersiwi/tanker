@@ -1,6 +1,7 @@
-import pygame
 import math
 import random
+from fpsConstants import FPS
+from pygame.draw import line, circle
 
 class PlayerObject:
     def __init__(self, x, y, xSpeed, ySpeed):
@@ -19,6 +20,10 @@ class PlayerObject:
 
 
 class Terrain:
+
+    WOODS = 0
+    DESERT = 1
+    RANDOM = 2
     def __init__(self, screenWidth, screenHeight):
         self.screenWidth = screenWidth
         self.screenHeight = screenHeight
@@ -36,16 +41,16 @@ class Terrain:
 
         
     def generate(self, terrainType):
-        if terrainType == 3 or terrainType == 404:
+        if terrainType == Terrain.RANDOM or terrainType == 404:
             terrainType = random.randint(0,2)
         '''
         Der Plan ist es ein Terrain zu generieren, das aussieht wie x^2.
         Diese Funktion kann ja dann nach lieben vareiert werden.
         
         '''
-        if terrainType == 0:
+        if terrainType == Terrain.WOODS:
             self.color = self.forest_green
-        if terrainType == 1:
+        if terrainType == Terrain.DESERT:
             self.color = self.sand
 
         for x in range(self.screenWidth):
@@ -83,7 +88,7 @@ class Terrain:
             raise ValueError("Y-Values have not been calculated yet. Call Terrain.generate() beforehand.")
 
         for x in range(self.screenWidth):
-            pygame.draw.line(window, self.color, (x, self.screenHeight), (x, self.screenHeight-self.yWerte[x]), 1)
+            line(window, self.color, (x, self.screenHeight), (x, self.screenHeight-self.yWerte[x]), 1)
 
         #draw any explosions on the terrain
         for explosion in self.explosions:
@@ -97,10 +102,48 @@ class Terrain:
 
 class Sun(PlayerObject):
     def __init__(self, screenWidth, screenHeight):
+
+        self.screenHeight = screenHeight
+        self.screenWidth = screenWidth
+
         self.sunColor = (252,208,70)
-        self.sunCoordinates = (int(screenWidth*8/10), int(screenHeight*3/10))
+        self.sunX = int(screenWidth*8/10)
+        self.sunY = int(screenHeight*3/10)
         self.sunRadius = 50
 
+        
+        self.angleSpeed = 0
+        self.movementRadius = int(screenWidth * 3 / 5)
+        self.angle = math.pi / 4
+
+
+    """
+        if the sun moves, it moves in a circular motion aound the frame;
+
+        __________________________________
+        |                                 |
+        |                    /            |
+        |                   /             |
+        |               r  /              |
+        |                 /               |
+        |________________/________________|
+    """
+    def move(self):
+        self.angleSpeed = (math.pi / 24) * FPS.dt
+
+    def updatePosition(self):
+        if self.angleSpeed == 0:
+            return
+        self.angle += self.angleSpeed
+        if self.angle > math.pi:
+            self.angle = 0
+
+    def calculatePosition(self):
+        sunX = (self.screenWidth / 2) + int(math.cos(self.angle) * self.movementRadius)
+        sunY = self.screenHeight - int(math.sin(self.angle) * self.movementRadius)
+        return (sunX, sunY)
+
     def draw(self, window):
-        pygame.draw.circle(window, self.sunColor, self.sunCoordinates, self.sunRadius)
+        self.updatePosition()
+        circle(window, self.sunColor, self.calculatePosition(), self.sunRadius)
 
