@@ -23,8 +23,8 @@ playerAmount = 4       #the number of players
 
 
 def main():
-    #startingMenu = StartMenu(screenWidth=w_width, screenHeight=w_height)
-    #startingMenu.runMenu(win)
+    startingMenu = StartMenu(screenWidth=w_width, screenHeight=w_height)
+    startingMenu.runMenu(win)
 
     #gameInitialisation
 

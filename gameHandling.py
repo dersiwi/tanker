@@ -209,10 +209,10 @@ class MenuBar:
         self.height = int(screenHeight*1.5/10)
 
         #(x, y, width, height, text=None, fontSize=12, color=Colors.black
-        self.changeWeaponButton = TextButton(x=410, y=25, width=120, height=25, text="Change Weapon", fontSize=20, color=Colors.grey)
-        self.moreForceButton = TextButton(x=600, y=10, width=50, height=25, text="More", fontSize=20)
-        self.lessForceButton = TextButton(x=600, y=40, width=50, height=25, text="Less", fontSize=20)
-        self.fireButton = TextButton(x=750, y=25, width=50, height=30, text="FIRE", fontSize=25, color=Colors.red)
+        self.changeWeaponButton = TextButton(x=410, y=25, text="Change Weapon", fontSize=20, color=Colors.grey)
+        self.moreForceButton = TextButton(x=600, y=10, text="More", fontSize=20)
+        self.lessForceButton = TextButton(x=600, y=40, text="Less", fontSize=20)
+        self.fireButton = TextButton(x=750, y=25, text="FIRE", fontSize=25, color=Colors.red)
 
         self.buttons = [self.changeWeaponButton, self.moreForceButton, self.lessForceButton, self.fireButton]
 

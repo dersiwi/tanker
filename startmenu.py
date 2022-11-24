@@ -46,10 +46,9 @@ class StartMenu:
         self.colorSelected = Colors.red 
 
 
-        self.terrainTypeWoods = TextButton(self.terrainBlockX, y = int(self.terrainBlockY + self.dterrainBlock * 2), text = "Woords", width = 90, height = 20, fontSize=self.fontSizeterrains)
-        self.terrainTypeDessert = TextButton(self.terrainBlockX, y = int(self.terrainBlockY + self.dterrainBlock * 3), text = "Dessert", width = 90, height = 20, fontSize=self.fontSizeterrains)
-        self.terrainTypeRandom = TextButton(self.terrainBlockX, y = int(self.terrainBlockY + self.dterrainBlock * 4), text = "Random", width = 90, height = 20, fontSize=self.fontSizeterrains)
-
+        self.terrainTypeWoods = TextButton(self.terrainBlockX, y = int(self.terrainBlockY + self.dterrainBlock * 2), text = "Woords", fontSize=self.fontSizeterrains)
+        self.terrainTypeDessert = TextButton(self.terrainBlockX, y = int(self.terrainBlockY + self.dterrainBlock * 3), text = "Dessert", fontSize=self.fontSizeterrains)
+        self.terrainTypeRandom = TextButton(self.terrainBlockX, y = int(self.terrainBlockY + self.dterrainBlock * 4), text = "Random", fontSize=self.fontSizeterrains)
         self.terrainTypeSelected = None
         
         self.runMenuBool = True
@@ -59,8 +58,6 @@ class StartMenu:
             x = int(screenWidth * 8/10),
             y = int(screenHeight * 6/10),
             text = "PLAY",
-            width = 144,
-            height = 30,
             fontSize = 40,
             color=Colors.green
             )
