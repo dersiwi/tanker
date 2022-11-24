@@ -3,6 +3,8 @@ from utilities import message_to_screen, TextButton,Colors
 from tank import Tank
 from playerObjects import Terrain, Sun
 from fpsConstants import FPS
+from random import randrange
+import math
 
 
 
@@ -32,15 +34,68 @@ class Animation():
 
 class StartMenuBackground:
     def __init__(self, screenWidth, screenHeight):
+        self.screenHeight = screenHeight
         self.backgroundTerrain = Terrain(screenWidth, screenHeight)
         self.backgroundTerrain.generate(Terrain.RANDOM)
         self.backgroundSun = Sun(screenWidth, screenHeight)
         self.backgroundSun.move()
+        
 
+        #birng life into the game 
+        amountTanks = randrange(2, 5)
+        self.tanks = []
+        for x in range(amountTanks):
+            tankX = randrange(10, screenWidth - 10)
+            tankNUmber = 0
+            self.tanks.append(Tank(tankX, self.backgroundTerrain.yWerte[tankX], Colors.black, screenWidth, tankNUmber))
+
+        #self, tx, ty, color, screenwidth, playerNumber
+        self.gravity = 3
+        self.action = -1
+        self.actionDuration = 0
+        self.projectile = None
+        self.actingTank = None
+
+
+    def updatePositions(self):
+        for tank in self.tanks:
+            if tank.ty < self.screenHeight-(self.backgroundTerrain.yWerte[tank.tx] + tank.theight -5):
+                tank.ty += tank.ySpeed
+                tank.ySpeed += int(math.ceil(self.gravity * FPS.dt))
+            else:
+                tank.ty = self.screenHeight-(self.backgroundTerrain.yWerte[tank.tx] + tank.theight - 5)
+                #Tank.tLp -= Tank.ySpeed
+                tank.ySpeed = 0
+
+    def chooseRandomAction(self):
+        actionChance = randrange(0, 100)
+
+        if actionChance < 10:
+            self.actingTank = self.tanks[randrange(0, len(self.tanks))]
+            self.action = randrange(0,3)
+            
+            if self.action == 0 or self.action == 1: # drive around
+                self.actionDuration = 20
+                
+
+    def randomAction(self):
+        if self.actionDuration > 0:
+            if self.action == 0:
+                self.actingTank.move(1, self.backgroundTerrain.yWerte)
+            if self.action == 1:
+                self.actingTank.move(-1, self.backgroundTerrain.yWerte)
+                
+            self.actionDuration -= 1
+        else:
+            self.chooseRandomAction()
 
     def draw(self, win):
         self.backgroundTerrain.draw(win)
         self.backgroundSun.draw(win)
+        for t in self.tanks:
+            t.draw(win)
+        self.updatePositions()
+        self.randomAction()
 
 class StartMenu:
 
@@ -59,7 +114,7 @@ class StartMenu:
         self.colorSelected = Colors.red 
 
 
-        self.terrainTypeWoods = TextButton(self.terrainBlockX, y = int(self.terrainBlockY + self.dterrainBlock * 2), text = "Woords", fontSize=self.fontSizeterrains)
+        self.terrainTypeWoods = TextButton(self.terrainBlockX, y = int(self.terrainBlockY + self.dterrainBlock * 2), text = "Woods", fontSize=self.fontSizeterrains)
         self.terrainTypeDessert = TextButton(self.terrainBlockX, y = int(self.terrainBlockY + self.dterrainBlock * 3), text = "Dessert", fontSize=self.fontSizeterrains)
         self.terrainTypeRandom = TextButton(self.terrainBlockX, y = int(self.terrainBlockY + self.dterrainBlock * 4), text = "Random", fontSize=self.fontSizeterrains)
         self.terrainTypeSelected = None
@@ -86,7 +141,7 @@ class StartMenu:
         
         self.buttons = [self.playButton, self.terrainTypeDessert, self.terrainTypeRandom, self.terrainTypeWoods]
 
-        self.animation = Animation(screenWidth, screenHeight)
+        #self.animation = Animation(screenWidth, screenHeight)
         self.background = StartMenuBackground(screenWidth, screenHeight)
 
 
@@ -114,7 +169,7 @@ class StartMenu:
     def drawMenu(self, win):
         self.background.draw(win)
         #-----Trying to get an animation to work
-        self.animation.draw(win)
+        #self.animation.draw(win)
         #-----
 
         message_to_screen(win, "TANKER", Colors.red, 50, (int(self.screenWidth/2-80),int(self.screenHeight/5)))
