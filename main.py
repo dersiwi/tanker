@@ -5,10 +5,11 @@ import random
 from tank import Tank
 from gameHandling import Game
 from startmenu import StartMenu
+from shop import GameShop
 from utilities import Colors
 from player import Player
 pygame.init()
-
+pygame.font.init()
 
 #screen variables
 w_width = int(900)
@@ -19,7 +20,6 @@ pygame.display.set_caption("Tanker")
 
 
 playerAmount = 4       #the number of players
-
 
 
 def main():
@@ -53,12 +53,18 @@ def main():
         
 
     #gameplay
-    
-    #game = Game(window=win, w_width=w_width, w_height=w_height, terrainType=startingMenu.terrainTypeSelected)
-    game = Game(window=win, w_width=w_width, w_height=w_height, terrainType=1)
-    game.setPlayerTanks(playerTanks)
-    game.gameLoop()
+    while True:
+        #game = Game(window=win, w_width=w_width, w_height=w_height, terrainType=startingMenu.terrainTypeSelected)
+        game = Game(window=win, w_width=w_width, w_height=w_height, terrainType=1)
+        game.setPlayerTanks(playerTanks)
+        game.gameLoop()
+
+        gameShop = GameShop(w_width, w_height)
+        gameShop.runGameShop(win)
+
+        for tank in playerTanks:
+            tank.tLp = 100
+
+        #somehow reste game
 
 main()
-
-

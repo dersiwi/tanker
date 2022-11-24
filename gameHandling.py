@@ -1,5 +1,5 @@
 from playerObjects import Terrain, Sun
-from projectile import Projectile
+from projectile import Projectile, VBombProjectile
 from utilities import message_to_screen, Colors, TextButton
 from fpsConstants import FPS
 
@@ -47,9 +47,8 @@ class Game:
         self.gameObjects.append(self.terrain)
 
         self.menuBar = MenuBar(screenWidth=w_width, screenHeight=w_height)
-
+        self.currentPlayerHasFired = False
         self.projectile = None
-
         #--------------constants
 
         self.gravity = 1.5 * FPS.FPS
@@ -84,6 +83,7 @@ class Game:
         else:
             self.playerTurn += 1
         self.currentPlayer = self.playerTanks[self.playerTurn]
+        self.currentPlayerHasFired = False
 
         #this ensures that no dead player can have turns
         if self.currentPlayer.tLp <= 0:
@@ -106,15 +106,17 @@ class Game:
             self.fire()
 
     def fire(self):
-        self.currentPlayer.fire()
-        pos = self.currentPlayer.calculateTurretEndPos()
-        
+        if not self.currentPlayerHasFired:
+            self.currentPlayer.fire()
+            pos = self.currentPlayer.calculateTurretEndPos()
+            
 
-        angle = self.currentPlayer.turretAngle
-        SpeedRoundY = self.currentPlayer.v0
-        SpeedRoundX = int(round(self.currentPlayer.v0 * math.cos(angle*180/math.pi)))
-        self.projectile = Projectile(pos[0], pos[1], SpeedRoundX, SpeedRoundY, self.terrain, self.gravity, self.currentPlayer.getCurrentWeapon(), self.playerTanks)
-        self.gameObjects.append(self.projectile)
+            angle = self.currentPlayer.turretAngle
+            SpeedRoundY = self.currentPlayer.v0
+            SpeedRoundX = int(round(self.currentPlayer.v0 * math.cos(angle*180/math.pi)))
+            self.projectile = Projectile(pos[0], pos[1], SpeedRoundX, SpeedRoundY, self.terrain, self.gravity, self.currentPlayer.getCurrentWeapon(), self.playerTanks)
+            self.gameObjects.append(self.projectile)
+            self.currentPlayerHasFired = True
 
     """
         Handle all key-pressed events that are happening
@@ -160,18 +162,21 @@ class Game:
 
     def gameLoop(self):
         self.runGameLoop = True
+        quitGame = False
         while self.runGameLoop:
                 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.runGameLoop = False
+                    quitGame = True
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     self.checkMouseClickGame(pygame.mouse.get_pos())
 
 
             self.handleKeyPressed(keys = pygame.key.get_pressed())
 
-            if not self.projectile == None and self.projectile.collisionDetection():
+                
+            if not self.projectile == None and self.projectile.hasCollided:
                 self.gameObjects.remove(self.projectile)
                 self.projectile = None
                 self.nextPlayer()
@@ -197,8 +202,8 @@ class Game:
                 self.nextPlayer()
             self.redrawGame()
 
-        pygame.quit()
-        print("I am very sorry, the restart of the game has not yet been implemetned. Still, i hope you had fun:)")
+        if quitGame:
+            pygame.quit()
     
 
 

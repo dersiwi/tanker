@@ -110,6 +110,14 @@ class TextButton:
         self.buttonHeight = 2 * self.margin + self.textheight
 
 
+    def setWidth(self, width):
+        self.textX = self.x + int(((width - self.textwidth) / 2))
+        self.buttonWidth = width
+    
+    def setHeight(self, height):
+        self.textY = self.y + int(((height - self.textwidth) / 2))
+        self.buttonHeight = height
+
 
     """
         True if the position was inside the bounds of this button
