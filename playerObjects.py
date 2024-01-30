@@ -11,6 +11,10 @@ class TerrainType:
     WOODS = 0
     DESERT = 1
     RANDOM = 2
+
+    NAMES = ["Woods", "Desert", "Random"]
+    IDXS = [WOODS, DESERT, RANDOM]
+
     def __init__(self, terrain_type : int) -> None:
         self.type = terrain_type
         if terrain_type == TerrainType.RANDOM:

@@ -121,10 +121,10 @@ class Game:
             self.nextPlayer()
             
         if keys[pygame.K_LEFT]:
-            self.currentPlayer.move(-1, self.terrain.yWerte)
+            self.currentPlayer.move(-1, self.terrain.height)
                 
         if keys[pygame.K_RIGHT]:
-            self.currentPlayer.move(1, self.terrain.yWerte)
+            self.currentPlayer.move(1, self.terrain.height)
             
         if keys[pygame.K_UP]:
             self.currentPlayer.turretAngle += 1

@@ -47,10 +47,8 @@ class TextButton:
                     |___________________|
             
             m : is the added margin 
-
-        
     """
-    def __init__(self, x, y, text=None, fontSize=12, color=Colors.black):
+    def __init__(self, x, y, text=None, fontSize=12, color=Colors.black, border : bool = False, margin : int = 0):
         self.x = x
         self.y = y
         self.textX = x
@@ -70,14 +68,14 @@ class TextButton:
 
         #----variables for border
 
-        self.hasBorder = False
-        self.borderColor = None
+        self.hasBorder = border
+        self.borderColor = Colors.black
 
         #---variables for background color
         self.hasBackgroundFilling = False
-        self.backgroundColor = None
+        self.backgroundColor = Colors.white
 
-        self.margin = 0
+        self.setMargin(margin)
 
     """
         the border is drawn around the rectangle, described by the x and y coordinates and the width and height of the 
