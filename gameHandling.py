@@ -1,7 +1,10 @@
-from playerObjects import Terrain, Sun
-from projectile import Projectile, VBombProjectile
+from playerObjects import Terrain, TerrainType, Sun
+from projectile import Projectile
 from utilities import message_to_screen, Colors, TextButton
 from fpsConstants import FPS
+from gameobject import GameObject, GameObjectHandler
+from player import Player
+from tank import Tank
 
 import pygame
 import math
@@ -22,8 +25,11 @@ class Game:
 
     clock = pygame.time.Clock()
 
+    STAGE_ONE = 1
+    STAGE_TWO = 2
 
-    def __init__(self, window, w_width, w_height, terrainType):
+
+    def __init__(self, window, w_width, w_height, tanks : list[Tank], terrainType):
 
         self.window = window
         self.w_width = w_width
@@ -32,19 +38,18 @@ class Game:
         self.runGameLoop = True
 
         #-------------gameplay variables
-        self.currentPlayer = None
-        self.playerTanks = []
-        self.gameObjects = []
-
-        self.playerTurn = 0
+        self.playerTanks : list[Tank] = tanks
+        self.gameObjects : list[GameObject] = []
+        self.go_handler : GameObjectHandler = GameObjectHandler()
+        self.playerTurn  : int = 0
+        self.currentPlayer : Tank = self.playerTanks[self.playerTurn]
 
         #-------------------------------initialize static game objects Sun, Terrain, MenuBar
         self.sun = Sun(w_width, w_height)
-        self.terrain = Terrain(w_width, w_height)
-        self.terrain.generate(terrainType)
+        self.terrain = Terrain(w_width, w_height, TerrainType(terrainType))
 
-        self.gameObjects.append(self.sun)
-        self.gameObjects.append(self.terrain)
+        self.go_handler.add_gameobject(self.sun)
+        self.go_handler.add_gameobject(self.terrain)
 
         self.menuBar = MenuBar(screenWidth=w_width, screenHeight=w_height)
         self.currentPlayerHasFired = False
@@ -52,15 +57,6 @@ class Game:
         #--------------constants
 
         self.gravity = 1.5 * FPS.FPS
-
-        
-
-    #create copy of player tanks so the modification of self.playerTanks does not effect global player-array
-    def setPlayerTanks(self, playerTanks):
-        for tank in playerTanks:
-            self.playerTanks.append(tank)
-        self.currentPlayer = self.playerTanks[self.playerTurn]
-
     
     """
         Return the next player in playerObjects. A player can only be chosen, if he has > 0 LP
@@ -69,21 +65,14 @@ class Game:
         If <= 1 player are alive this method sets self.runGameLoop to false
     """
     def nextPlayer(self):
-        amountLiving = 0
-        for Tank in self.playerTanks:
-            if Tank.tLp > 0:
-                amountLiving += 1
-        if amountLiving <= 1:
+        if len(self.playerTanks) <= 1:
             self.runGameLoop = False
             return
-
         
-        if self.playerTurn == len(self.playerTanks) - 1:
-            self.playerTurn = 0 
-        else:
-            self.playerTurn += 1
+        self.playerTurn = (self.playerTurn + 1) % len(self.playerTanks)
         self.currentPlayer = self.playerTanks[self.playerTurn]
         self.currentPlayerHasFired = False
+        self.stage = Game.STAGE_ONE
 
         #this ensures that no dead player can have turns
         if self.currentPlayer.tLp <= 0:
@@ -107,15 +96,16 @@ class Game:
 
     def fire(self):
         if not self.currentPlayerHasFired:
+            self.stage = Game.STAGE_TWO
             self.currentPlayer.fire()
-            pos = self.currentPlayer.calculateTurretEndPos()
+            pos = self.currentPlayer.get_turret_end_pos()
             
 
             angle = self.currentPlayer.turretAngle
             SpeedRoundY = self.currentPlayer.v0
             SpeedRoundX = int(round(self.currentPlayer.v0 * math.cos(angle*180/math.pi)))
-            self.projectile = Projectile(pos[0], pos[1], SpeedRoundX, SpeedRoundY, self.terrain, self.gravity, self.currentPlayer.getCurrentWeapon(), self.playerTanks)
-            self.gameObjects.append(self.projectile)
+            self.projectile = Projectile(pos[0], pos[1], SpeedRoundX, SpeedRoundY, self.terrain, self.gravity, self.currentPlayer.getCurrentWeapon(), self.playerTanks, self.go_handler)
+            self.go_handler.add_gameobject(self.projectile)
             self.currentPlayerHasFired = True
 
     """
@@ -146,55 +136,61 @@ class Game:
     def redrawGame(self):
         #GAME LOOP DRAWING
         #--------------------terrain drawing
-        for gameObject in self.gameObjects:
-            gameObject.draw(self.window)
-
-
+        self.go_handler.draw_gameobjects(self.window)
         self.menuBar.draw(self.window, self.currentPlayer)
         
 
         for tank in self.playerTanks:
             if tank.tLp > 0:
-                tank.draw(self.window)        
+                tank.draw(self.window)    
         pygame.display.update()
-        
+    
+
+
+    def __stage_one_iteration(self) -> bool:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.runGameLoop = False
+                self.quitGame = True
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                self.checkMouseClickGame(pygame.mouse.get_pos())
+
+        self.handleKeyPressed(keys = pygame.key.get_pressed())
+
+    def __stage_two_iteration(self):
+        self.projectile.projectile_iteration()
 
 
     def gameLoop(self):
+        """
+        Runs the game-loop. This method works in two stages for ecah player
+            Stage 1 - Adjusting Stage:
+                The player can drive around, change weapons, adjust force etc.
+                As soon as the player fires, this switches to stage two
+            Stage 2 - Projectile Stage:
+                The player has fired and the projcetile is in the air. During this phase the projectile of the player is 
+                Flying and the phase (and thereby the player turn) ends when the projectile has expoloded and all damage etc. is dealt with.
+        """
         self.runGameLoop = True
-        quitGame = False
+        self.quitGame = False
+        self.stage = Game.STAGE_ONE
         while self.runGameLoop:
-                
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.runGameLoop = False
-                    quitGame = True
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    self.checkMouseClickGame(pygame.mouse.get_pos())
-
-
-            self.handleKeyPressed(keys = pygame.key.get_pressed())
+            
+            if self.stage == Game.STAGE_ONE:
+                self.__stage_one_iteration()
+            elif self.stage == Game.STAGE_TWO:
+                self.__stage_two_iteration()
+            else:
+                raise ValueError("Unknown stage %i."%self.stage)
 
                 
             if not self.projectile == None and self.projectile.hasCollided:
-                self.gameObjects.remove(self.projectile)
+                self.go_handler.remove_gameobject(self.projectile)
                 self.projectile = None
                 self.nextPlayer()
 
             self.window.fill(Colors.skyblue)
-            for tank in self.playerTanks:
-                if tank.ty < self.w_height:
-                    if tank.ty < self.w_height-(self.terrain.yWerte[tank.tx] + tank.theight -5):
-                        tank.ty += tank.ySpeed
-                        tank.ySpeed += int(self.gravity * FPS.dt)
-                    else:
-                        tank.ty = self.w_height-(self.terrain.yWerte[tank.tx] + tank.theight - 5)
-                        #Tank.tLp -= Tank.ySpeed
-                        tank.ySpeed = 0
-                        
-                else:
-                    tank.tLp = 0
-            
+            self.__check_gravity()            
             Game.clock.tick(FPS.FPS)
 
             #das ist nur eine Provisorische Abfrage um bugs uz vermeiden
@@ -202,10 +198,25 @@ class Game:
                 self.nextPlayer()
             self.redrawGame()
 
-        if quitGame:
+        if self.quitGame:
             pygame.quit()
-    
 
+
+    def __check_gravity(self):
+        """
+        For each tank, this function checks if a tank is floating in the air and then applies gravity (changes the tank's) y-velocity
+        """
+        for tank in self.playerTanks:
+            if tank.ty < self.w_height:
+                if tank.ty < self.w_height-(self.terrain.height[tank.tx] + tank.theight -5):
+                    tank.ty += tank.ySpeed
+                    tank.ySpeed += int(self.gravity * FPS.dt)
+                else:
+                    tank.ty = self.w_height-(self.terrain.height[tank.tx] + tank.theight - 5)
+                    #Tank.tLp -= Tank.ySpeed
+                    tank.ySpeed = 0
+            else:
+                tank.tLp = 0
 
 class MenuBar:
     def __init__(self, screenWidth, screenHeight):
@@ -221,17 +232,15 @@ class MenuBar:
 
         self.buttons = [self.changeWeaponButton, self.moreForceButton, self.lessForceButton, self.fireButton]
 
-    
-
-
-    def draw(self, win, currentPlayer):
+    def draw(self, win, currentPlayer : Tank):
         #-------------------Controlbar and contents of controlbar
         pygame.draw.rect(win, self.menuBarColor, (0,0, self.width, self.height))
         pygame.draw.line(win, (240,248,255), (0,self.height+1), (self.width, self.height+1), 0)
 
         #--drawing the current player
-        pygame.draw.ellipse(win, currentPlayer.tcolor, (0, currentPlayer.turretheight, currentPlayer.twidth, currentPlayer.theight), 0)
-        pygame.draw.ellipse(win, currentPlayer.tcolor, (int((currentPlayer.twidth-currentPlayer.turretwidth)/2), 5,currentPlayer.turretwidth,currentPlayer.turretheight),0)
+        currentPlayer.tank_graphics.draw(win, 0, currentPlayer.tank_graphics.turretheight, Tank.calculateTurretEndPos(0,currentPlayer.tank_graphics.turretheight, currentPlayer.turretAngle))
+        #pygame.draw.ellipse(win, currentPlayer.tcolor, (0, currentPlayer.turretheight, currentPlayer.twidth, currentPlayer.theight), 0)
+        #pygame.draw.ellipse(win, currentPlayer.tcolor, (int((currentPlayer.twidth-currentPlayer.turretwidth)/2), 5,currentPlayer.turretwidth,currentPlayer.turretheight),0)
 
         message_to_screen(win, str(currentPlayer.playerNumber), Colors.black, 20, (currentPlayer.twidth+5,0))
 

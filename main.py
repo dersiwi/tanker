@@ -2,7 +2,7 @@ import pygame
 import random
 #from tankClass import Tank
 #from terrainClass import terrain
-from tank import Tank
+from tank import Tank, TankInitValues
 from gameHandling import Game
 from startmenu import StartMenu
 from shop import GameShop
@@ -49,22 +49,16 @@ def main():
             colorCounter = 0
 
     
-        
-        
-
     #gameplay
     while True:
         #game = Game(window=win, w_width=w_width, w_height=w_height, terrainType=startingMenu.terrainTypeSelected)
-        game = Game(window=win, w_width=w_width, w_height=w_height, terrainType=1)
-        game.setPlayerTanks(playerTanks)
+        game = Game(window=win, w_width=w_width, w_height=w_height, tanks=playerTanks, terrainType=1)
         game.gameLoop()
 
         gameShop = GameShop(w_width, w_height)
         gameShop.runGameShop(win)
 
         for tank in playerTanks:
-            tank.tLp = 100
-
-        #somehow reste game
+            tank.tLp = TankInitValues.LP
 
 main()

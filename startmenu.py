@@ -1,7 +1,7 @@
 import pygame
 from utilities import message_to_screen, TextButton,Colors
 from tank import Tank
-from playerObjects import Terrain, Sun
+from playerObjects import Terrain, TerrainType, Sun
 from fpsConstants import FPS
 from random import randrange
 import math
@@ -12,8 +12,6 @@ class Animation():
     def __init__(self, w_width, w_height):
         self.x = 0
         self.y = int(w_height / 2)
-
-        
 
         self.width = 50
         self.height = 20
@@ -35,8 +33,7 @@ class Animation():
 class StartMenuBackground:
     def __init__(self, screenWidth, screenHeight):
         self.screenHeight = screenHeight
-        self.backgroundTerrain = Terrain(screenWidth, screenHeight)
-        self.backgroundTerrain.generate(Terrain.RANDOM)
+        self.backgroundTerrain = Terrain(screenWidth, screenHeight, TerrainType(TerrainType.RANDOM))
         self.backgroundSun = Sun(screenWidth, screenHeight)
         self.backgroundSun.move()
         
@@ -47,7 +44,7 @@ class StartMenuBackground:
         for x in range(amountTanks):
             tankX = randrange(10, screenWidth - 10)
             tankNUmber = 0
-            self.tanks.append(Tank(tankX, self.backgroundTerrain.yWerte[tankX], Colors.black, screenWidth, tankNUmber))
+            self.tanks.append(Tank(tankX, self.backgroundTerrain.height[tankX], Colors.black, screenWidth, tankNUmber))
 
         #self, tx, ty, color, screenwidth, playerNumber
         self.gravity = 3
@@ -59,11 +56,11 @@ class StartMenuBackground:
 
     def updatePositions(self):
         for tank in self.tanks:
-            if tank.ty < self.screenHeight-(self.backgroundTerrain.yWerte[tank.tx] + tank.theight -5):
+            if tank.ty < self.screenHeight-(self.backgroundTerrain.height[tank.tx] + tank.theight -5):
                 tank.ty += tank.ySpeed
                 tank.ySpeed += int(math.ceil(self.gravity * FPS.dt))
             else:
-                tank.ty = self.screenHeight-(self.backgroundTerrain.yWerte[tank.tx] + tank.theight - 5)
+                tank.ty = self.screenHeight-(self.backgroundTerrain.height[tank.tx] + tank.theight - 5)
                 #Tank.tLp -= Tank.ySpeed
                 tank.ySpeed = 0
 
@@ -81,9 +78,9 @@ class StartMenuBackground:
     def randomAction(self):
         if self.actionDuration > 0:
             if self.action == 0:
-                self.actingTank.move(1, self.backgroundTerrain.yWerte)
+                self.actingTank.move(1, self.backgroundTerrain.height)
             if self.action == 1:
-                self.actingTank.move(-1, self.backgroundTerrain.yWerte)
+                self.actingTank.move(-1, self.backgroundTerrain.height)
                 
             self.actionDuration -= 1
         else:
