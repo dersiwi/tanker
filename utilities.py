@@ -77,6 +77,13 @@ class TextButton:
 
         self.setMargin(margin)
 
+
+    def setText(self, text):
+        self.text = text
+        self.textwidth, self.textheight = self.fontObject.size(text)
+        self.buttonWidth, self.buttonHeight = self.textwidth, self.textheight
+        self.setMargin(self.margin)
+
     """
         the border is drawn around the rectangle, described by the x and y coordinates and the width and height of the 
         button.

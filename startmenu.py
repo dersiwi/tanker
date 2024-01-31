@@ -88,6 +88,7 @@ class StartMenuBackground:
             self.chooseRandomAction()
 
     def draw(self, win):
+        win.fill(Colors.skyblue)
         self.backgroundTerrain.draw(win)
         self.backgroundSun.draw(win)
         for t in self.tanks:
@@ -139,11 +140,82 @@ class TerrainSelector(GameObject):
 
 
 class PlayerSelector(GameObject):
+    """
+    This class is resposible for choosing the amount and type of players.
+    It dynamically adds buttons, such that the amount of buttons always equals the amount of players.
+    
+    """
+
+    class PlayerType:
+        HUMAN = 0
+        AI = 1
+        RANDOM = 2
+        IDXS = [HUMAN, AI, RANDOM]
+        STRINGS = ["Human", "Computer", "Random"]
+
+    MAX_PLAYER = 4
     def __init__(self, x : int, y : int, fontsize : int) -> None:
         super().__init__(x, y)
+        
+        self.player_buttons : list[TextButton] = []
+        self.player_type : list[int] = []
 
+        self.fontsize = fontsize
+        self.currY = 0
+        self.__create_player_button()
+        self.__create_player_button()
+
+        self.__create_add_and_remove_button()
+
+    def __create_add_and_remove_button(self):
+        self.addPlayer = TextButton(
+            x = int(self.x+150),
+            y = int(self.y+50),
+            text = "add player",fontSize = self.fontsize,color=Colors.green,border=True,margin=10)
+        self.addPlayer.addBackground()
+        self.removePlayer = TextButton(
+            x = int(self.x+150),
+            y = int(self.y+100),
+            text = "remove player",fontSize = self.fontsize,color=Colors.red,border=True,margin=10)
+        self.removePlayer.addBackground()
+
+
+    def __create_player_button(self):
+        if len(self.player_buttons) >= PlayerSelector.MAX_PLAYER:
+            return
+        self.player_buttons.append(TextButton(x = self.x, y = int(self.y + 2 * self.fontsize * (self.currY + 2)), text = "Human", fontSize=self.fontsize, border=True, margin=int(self.fontsize / 5)))
+        self.player_type.append(PlayerSelector.PlayerType.HUMAN)
+        self.currY += 1
+
+    def __remove_player_button(self):
+        if len(self.player_buttons) > 2:
+            self.player_buttons.pop(-1)
+            self.player_type.pop(-1)
+            self.currY -= 1
+
+    def __change_player_type(self, button_index : int):
+        self.player_type[button_index] = (self.player_type[button_index] + 1) % len(PlayerSelector.PlayerType.IDXS)
+        self.player_buttons[button_index].setText(PlayerSelector.PlayerType.STRINGS[self.player_type[button_index]])
+    
+    def checkForButtonBlick(self, pos):
+        if self.addPlayer.isClicked(pos):
+            self.__create_player_button()
+        if self.removePlayer.isClicked(pos):
+            self.__remove_player_button()
+
+        for button_idx, button in enumerate(self.player_buttons):
+            if button.isClicked(pos):
+                self.__change_player_type(button_idx)
+
+    def get_n_players(self):
+        return len(self.player_buttons)
+
+    
     def draw(self, win):
-        pass
+        for button in self.player_buttons:
+            button.draw(win)
+        self.addPlayer.draw(win)
+        self.removePlayer.draw(win)
 
 class StartMenu:
     """
@@ -152,7 +224,9 @@ class StartMenu:
     2. Choosing the player and playertype
     """
     TERRAIN_SELECTION_MODE = -1
+    TERRAIN_SELECTION_TEXT = "Choose players"
     PLAYER_SELECTION_MODE = 1
+    PLAYER_SELECTION_TEXT = "Choose terrain"
 
     clock = pygame.time.Clock()
     def __init__(self, screenWidth, screenHeight):
@@ -160,17 +234,18 @@ class StartMenu:
         self.screenHeight = screenHeight
         self.terrain_selector : TerrainSelector = TerrainSelector(x = self.screenWidth * 1.5/10, y = int(self.screenHeight * 2/10), fontsize = 35)
         self.player_selector : PlayerSelector = PlayerSelector(x = self.screenWidth * 1.5/10, y = int(self.screenHeight * 2/10), fontsize = 35)
-        self.mode_switch_button = TextButton(x = int(self.screenWidth * 4/10), y = int(self.screenHeight * 6/10), text="Choose Players", fontSize=35,
-                                             color=Colors.red,border=True,margin=10)
         
         self.runMenuBool = True
         self.gotoGame = True
 
         self.mode = StartMenu.TERRAIN_SELECTION_MODE
+        self.mode_switch_button = TextButton(x = int(self.screenWidth * 4/10), y = int(self.screenHeight * 6/10), text=StartMenu.TERRAIN_SELECTION_TEXT, fontSize=35,
+                                                    color=Colors.red,border=True,margin=10)
         
         self.create_playbutton()
         #self.animation = Animation(screenWidth, screenHeight)
         self.background = StartMenuBackground(screenWidth, screenHeight)
+
 
     def create_playbutton(self):
         self.playButton = TextButton(
@@ -182,12 +257,22 @@ class StartMenu:
         self.playButton.addBackground()
     def checkMouseClick(self, pos):
         #this function checks if the mouse clicked any buttons and executes the corresponding action
-        self.terrain_selector.checkForTerrainButtonClick(pos)
+        if self.mode == StartMenu.TERRAIN_SELECTION_MODE:
+            self.terrain_selector.checkForTerrainButtonClick(pos)
+        elif self.mode == StartMenu.PLAYER_SELECTION_MODE:
+            self.player_selector.checkForButtonBlick(pos)
         if self.playButton.isClicked(pos):
             self.runMenuBool = False
         
         if self.mode_switch_button.isClicked(pos):
-            self.mode *= (-1)
+            if self.mode == StartMenu.TERRAIN_SELECTION_MODE:
+                self.mode = StartMenu.PLAYER_SELECTION_MODE
+                self.mode_switch_button.text = StartMenu.PLAYER_SELECTION_TEXT
+            elif self.mode == StartMenu.PLAYER_SELECTION_MODE:
+                self.mode = StartMenu.TERRAIN_SELECTION_MODE
+                self.mode_switch_button.text = StartMenu.TERRAIN_SELECTION_TEXT
+            else:
+                raise ValueError("Mode %i unknowon"%self.mode)
 
     def drawMenu(self, win):
         self.background.draw(win)
@@ -199,7 +284,6 @@ class StartMenu:
             self.terrain_selector.draw(win)
         elif self.mode == StartMenu.PLAYER_SELECTION_MODE:
             self.player_selector.draw(win)
-            print("DWro")
         else:
             raise ValueError("Illegal mode %i in startmenu"%self.mode)
         pygame.display.update()

@@ -34,6 +34,8 @@ def main():
     player = []
     playerTanks = []
 
+    playerAmount = startingMenu.player_selector.get_n_players()
+
     for x in range(playerAmount):
         p = Player(x, colors[colorCounter])
 
@@ -52,7 +54,7 @@ def main():
     #gameplay
     while True:
         #game = Game(window=win, w_width=w_width, w_height=w_height, terrainType=startingMenu.terrainTypeSelected)
-        game = Game(window=win, w_width=w_width, w_height=w_height, tanks=playerTanks, terrainType=1)
+        game = Game(window=win, w_width=w_width, w_height=w_height, tanks=playerTanks, terrainType=startingMenu.terrain_selector.terrainTypeSelected)
         game.gameLoop()
 
         gameShop = GameShop(w_width, w_height)
