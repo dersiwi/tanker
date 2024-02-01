@@ -32,14 +32,15 @@ class TypeZeroWeapon(Weapon):
 
 
 class TypeOneWeapon(Weapon):
-    def __init__(self, name, weapon_id, w_type, amount, accuracy, weaponweapon_id_to_drop, n_drops):
+    def __init__(self, name, weapon_id, w_type, amount, accuracy, weaponweapon_id_to_drop, n_drops, cooldown):
         super().__init__(name, weapon_id, w_type, amount)
         self.accuracy = accuracy
         self.weaponweapon_id_to_drop = weaponweapon_id_to_drop
         self.n_drops = n_drops
+        self.cooldown = cooldown
 
     def get_copy(self):
-        return TypeOneWeapon(self.name, self.weapon_id, self.w_type, self.amount, self.accuracy, self.weaponweapon_id_to_drop, self.n_drops)
+        return TypeOneWeapon(self.name, self.weapon_id, self.w_type, self.amount, self.accuracy, self.weaponweapon_id_to_drop, self.n_drops, self.cooldown)
 
     
 class WeaponsManager:
@@ -73,7 +74,8 @@ class WeaponsManager:
                                             w_type = typezero["weapon_type"],
                                             accuracy=typezero["accuracy"],
                                             weaponweapon_id_to_drop=typezero["weapon_id_to_drop"],
-                                            n_drops=typezero["n_drops"]))
+                                            n_drops=typezero["n_drops"],
+                                            cooldown=typezero["cooldown"]))
             
     def get_initial_weapons(self) -> list[Weapon]:
         init_weapons = []

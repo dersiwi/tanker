@@ -100,11 +100,11 @@ class Terrain(GameObject):
                 continue
             xV_explosion = abs(x-xV)
             yV_explosion = int(round(math.sqrt(r**2 - xV_explosion**2)))
-            print("Explosion xV, xY = %s, %s"%(xV_explosion, yV_explosion))
-            print("Height at xV : %i, newheight %i"%(Globals.SCREEN_HEIGHT - self.height[xV], y + yV_explosion))
+            #print("Explosion xV, xY = %s, %s"%(xV_explosion, yV_explosion))
+            #print("Height at xV : %i, newheight %i"%(Globals.SCREEN_HEIGHT - self.height[xV], y + yV_explosion))
 
             self.height[xV] = max(y + yV_explosion, Globals.SCREEN_HEIGHT - self.height[xV])
-            print(self.height[xV])
+            #print(self.height[xV])
 
     def explosion(self, expl : ExplosionData):
         x = expl.x
@@ -116,11 +116,11 @@ class Terrain(GameObject):
                 continue
             xV_explosion = abs(x-xV)
             yV_explosion = int(round(math.sqrt(r**2 - xV_explosion**2)))
-            print("Explosion xV, xY = %s, %s"%(xV_explosion, yV_explosion))
-            print("Height at xV : %i, newheight %i"%(Globals.SCREEN_HEIGHT - self.height[xV], y + yV_explosion))
+            #print("Explosion xV, xY = %s, %s"%(xV_explosion, yV_explosion))
+            #print("Height at xV : %i, newheight %i"%(Globals.SCREEN_HEIGHT - self.height[xV], y + yV_explosion))
 
             self.height[xV] = Globals.SCREEN_HEIGHT - max(y + yV_explosion, Globals.SCREEN_HEIGHT - self.height[xV])
-            print(self.height[xV])
+            #print(self.height[xV])
 
     def draw(self, window):
         for x in range(self.screenWidth):

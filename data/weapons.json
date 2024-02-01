@@ -36,22 +36,44 @@
 
     "1" : [
         {
-            "name" : "Airstrike",
-            "accuracy" : 0.7,
+            "name" : "Airstrike 0.6",
+            "accuracy" : 0.6,
+            "initial_amount" : 2,
+            "weapon_id_to_drop" : 0,
+            "weapon_type" : 1,
+            "n_drops" : 1,
+            "cooldown" : 5,
+            "weapon_id" : 5
+        },
+        {
+            "name" : "Aristrike 0.95",
+            "accuracy" : 0.95,
+            "initial_amount" : 1,
+            "weapon_id_to_drop" : 0,
+            "weapon_type" : 1,
+            "n_drops" : 1,
+            "cooldown" : 20,
+            "weapon_id" : 6
+        },
+        {
+            "name" : "Carpet Bomber 0.2",
+            "accuracy" : 0.2,
             "initial_amount" : 1,
             "weapon_id_to_drop" : 0,
             "weapon_type" : 1,
             "n_drops" : 5,
-            "weapon_id" : 5
+            "cooldown" : 5,
+            "weapon_id" : 7
         },
         {
             "name" : "Atom Bomber",
             "accuracy" : 0.95,
-            "initial_amount" : 1,
+            "initial_amount" : 0,
             "weapon_id_to_drop" : 4,
             "weapon_type" : 1,
             "n_drops" : 1,
-            "weapon_id" : 6
+            "cooldown" : 5,
+            "weapon_id" : 8
         }
     ]
 }

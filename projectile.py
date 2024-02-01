@@ -6,7 +6,9 @@ from utilities import Colors, DegreeCnvt
 from environment_objects import Terrain
 from utilities import ExplosionData
 from weapons import Weapon, TypeOneWeapon, TypeZeroWeapon, WeaponsManager
+
 import math
+import random
 
 class Explosion(GameObject):
     def __init__(self, x, y, radius, damage):
@@ -98,29 +100,43 @@ class Airstrike(GameObject):
         WIDTH = 20
 
         SPEED = 60
-        COOLDOWN = 15
-        def __init__(self, x, x_speed_direction, dropoff_x, weapon_to_dropoff : Weapon, n_drops : int) -> None:
+
+        ACCURACY_PLAY = 150
+        def __init__(self, x, x_speed_direction, dropoff_x) -> None:
             super().__init__(x, Airstrike.Airplane.HEIGHT, xSpeed = Airstrike.Airplane.SPEED * x_speed_direction)
             self.dropoff_x = dropoff_x
-
             self.dropoff_phase = False
-            self.dropoffs = n_drops
-            self.cooldown = Airstrike.Airplane.COOLDOWN
+
+        def set_weapon_parameters(self, weapon_to_dropoff : Weapon, n_drops : int, accuracy : float, cooldown : int):
             self.weapon_to_dropoff = weapon_to_dropoff
-            print(self.dropoff_x)
+            self.dropoffs = n_drops
+            self.accuracy = accuracy
+            self.cooldown = cooldown
+            self.cooldown_count = cooldown
+
+            self.adjust_dropoff()
+
+    
+        def adjust_dropoff(self):
+            """Adjusts the dropoff-point to simulate accuracy"""
+            shift_direction = 1 if random.random() > 0.5 else -1
+            shift = shift_direction * random.randint(0, int((1 - self.accuracy) * Airstrike.Airplane.ACCURACY_PLAY))
+            print("dropoff shifted by : %s"%shift)
+            self.dropoff_x = self.dropoff_x +  shift
+
 
         def update(self):
             super().update()
-            if (self.x - self.dropoff_x) <= 50:
+            if abs(self.x - self.dropoff_x) <= 10:
                 self.dropoff_phase = True
             
-            self.cooldown -= 1
+            self.cooldown_count -= 1
             
-            if self.dropoff_phase and self.dropoffs > 0 and self.cooldown <= 0:
+            if self.dropoff_phase and self.dropoffs > 0 and self.cooldown_count <= 0:
                 self.dropoffs -= 1
                 GameObjectHandler.get_instance().add_gameobject(Projectile(self.x, Airstrike.Airplane.HEIGHT, xSpeed = self.xSpeed, ySpeed = 0, 
                                                                            weapon = self.weapon_to_dropoff))
-                self.cooldown = Airstrike.Airplane.COOLDOWN
+                self.cooldown_count = self.cooldown
 
 
         def draw(self, win):
@@ -144,19 +160,21 @@ class Airstrike(GameObject):
             planned_x, planned_y = pos
             if planned_y < Airstrike.Airplane.HEIGHT:
                 planned_y = Airstrike.Airplane.HEIGHT + 50
+            print("Planned_y %i"%planned_y)
             xfall = int(Airstrike.Airplane.SPEED * math.sqrt( 2 * (planned_y - Airstrike.Airplane.HEIGHT) / Globals.GRAVITY))
             if planned_x > Globals.SCREEN_WIDTH / 2:
                 self.airplane = Airstrike.Airplane(x = Globals.SCREEN_WIDTH + Airstrike.Airplane.WIDTH,
                                                    x_speed_direction = -1,
-                                                   dropoff_x=planned_x + xfall,
-                                                   weapon_to_dropoff=self.dropoff_weapon,
-                                                   n_drops=self.weapon.n_drops)
+                                                   dropoff_x=planned_x + xfall)
             else:
                 self.airplane = Airstrike.Airplane(x = - Airstrike.Airplane.WIDTH,
                                                    x_speed_direction= 1,
-                                                   dropoff_x=planned_x - xfall,
-                                                    weapon_to_dropoff=self.dropoff_weapon,
-                                                   n_drops=self.weapon.n_drops)
+                                                   dropoff_x=planned_x - xfall)
+                
+            self.airplane.set_weapon_parameters(self.dropoff_weapon,
+                                                n_drops=self.weapon.n_drops,
+                                                accuracy=self.weapon.accuracy,
+                                                cooldown = self.weapon.cooldown)
             GameObjectHandler.get_instance().add_gameobject(self.airplane)
 
     def update(self):
@@ -165,7 +183,7 @@ class Airstrike(GameObject):
             if not self.airplane.has_duration:
                 self.airplane.has_duration = True
                 self.airplane.duration = 200
-            #print("Airplane done, duration left : %i"%self.airplane.duration)
+           #print("Air plane done, duration left : %i"%self.airplane.duration)
 
 
     def draw(self, win):

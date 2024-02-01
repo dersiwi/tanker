@@ -87,7 +87,7 @@ class Tank(GameObject):
         return GameObject.BoundingBox.create_bounding_box(self.x, self.y, self.twidth, self.theight)
     
     def explosion(self, expl : ExplosionData):
-        if expl.is_in_radius(self.x, self.y):
+        if expl.is_in_radius(self.x, self.y) or expl.is_in_radius(self.x+Tank.WIDTH, self.y):
             self.tLp -= expl.damage
 
         
@@ -112,7 +112,7 @@ class Tank(GameObject):
 
         if not self.getCurrentWeapon().hasAmmoLeft():
             self.weapons.pop(self.currentWeapon)
-        self.changeWeapon()
+            self.changeWeapon()
 
     def getCurrentWeapon(self) -> Weapon:
         return self.weapons[self.currentWeapon]

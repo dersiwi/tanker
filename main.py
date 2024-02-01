@@ -21,24 +21,14 @@ win = pygame.display.set_mode(window)
 pygame.display.set_caption("Tanker")
 
 
-playerAmount = 4       #the number of players
 
 
-def main():
-    startingMenu = StartMenu(screenWidth=w_width, screenHeight=w_height)
-    startingMenu.runMenu(win)
-
-    #gameInitialisation
-
-    colors = Colors.playerColors
-    colorCounter = 0
-
+def create_tanks(player_amount):
     player = []
     playerTanks = []
-
-    playerAmount = startingMenu.player_selector.get_n_players()
-
-    for x in range(playerAmount):
+    colors = Colors.playerColors
+    colorCounter = 0
+    for x in range(player_amount):
         p = Player(x, colors[colorCounter])
 
         randomX = random.randint(0, 740)
@@ -51,18 +41,26 @@ def main():
         colorCounter+=1
         if colorCounter ==len(colors):
             colorCounter = 0
+    return player, playerTanks
 
+def main():
+    startingMenu = StartMenu(screenWidth=w_width, screenHeight=w_height)
+    startingMenu.runMenu(win)
+
+    #gameInitialisation
+        
     
     #gameplay
     while True:
         #game = Game(window=win, w_width=w_width, w_height=w_height, terrainType=startingMenu.terrainTypeSelected)
+        player, playerTanks = create_tanks(startingMenu.player_selector.get_n_players())
         game = Game(window=win, tanks=playerTanks, terrainType=startingMenu.terrain_selector.terrainTypeSelected)
         game.gameLoop()
 
-        gameShop = GameShop(w_width, w_height)
-        gameShop.runGameShop(win)
+        #gameShop = GameShop(w_width, w_height)
+        #gameShop.runGameShop(win)
 
-        for tank in playerTanks:
-            tank.tLp = TankInitValues.LP
+        #for tank in playerTanks:
+        #    tank.tLp = TankInitValues.LP
 
 main()
