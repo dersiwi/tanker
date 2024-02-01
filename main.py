@@ -8,12 +8,14 @@ from startmenu import StartMenu
 from shop import GameShop
 from utilities import Colors
 from player import Player
+from fpsConstants import Globals
+from weapons import WeaponsManager
 pygame.init()
 pygame.font.init()
 
 #screen variables
-w_width = int(900)
-w_height= int(600)
+w_width = Globals.SCREEN_WIDTH
+w_height= Globals.SCREEN_HEIGHT
 window = (w_width, w_height)
 win = pygame.display.set_mode(window)
 pygame.display.set_caption("Tanker")
@@ -40,7 +42,7 @@ def main():
         p = Player(x, colors[colorCounter])
 
         randomX = random.randint(0, 740)
-        T = Tank(randomX,100, colors[colorCounter], w_width, x + 1)
+        T = Tank(randomX,100, colors[colorCounter], x + 1, initial_weapons=WeaponsManager.get_instance().get_initial_weapons())
         p.tank = T
 
         player.append(p)

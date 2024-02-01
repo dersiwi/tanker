@@ -5,17 +5,17 @@ from fpsConstants import Globals
 from utilities import Colors, DegreeCnvt
 from environment_objects import Terrain
 from utilities import ExplosionData
-from weapons import Weapon
+from weapons import Weapon, TypeOneWeapon, TypeZeroWeapon, WeaponsManager
 import math
 
-
 class Explosion(GameObject):
-    def __init__(self, x, y, radius):
+    def __init__(self, x, y, radius, damage):
         super().__init__(x=x, y=y, has_duration=True, duration=2)
         self.radius = radius
+        self.damage = damage
 
     def get_data(self) -> ExplosionData:
-        return ExplosionData(self.x, self.y, self.radius)
+        return ExplosionData(self.x, self.y, self.radius, self.damage)
     
     def draw(self, win):
         circle(win, Colors.red, (self.x, self.y), self.radius)
@@ -41,10 +41,10 @@ class Projectile(GameObject):
         print(vX, vY)
         return vX, vY
 
-    def __init__(self, x, y, xSpeed, ySpeed, weapon):
+    def __init__(self, x, y, xSpeed, ySpeed, weapon : TypeZeroWeapon):
         super().__init__(x, y, xSpeed, ySpeed, affected_by_gravity=True, collision_class=Globals.CollisionClass.CLASS_TWO)
         self.projectileColor = Colors.black
-        self.weapon : Weapon = weapon    #the weapon from which the bullet was fired
+        self.weapon : TypeZeroWeapon = weapon    #the weapon from which the bullet was fired
         self.hasCollided = False
 
     
@@ -59,7 +59,7 @@ class Projectile(GameObject):
     
     def collision(self, gameobject) -> bool:
         print("Projcetile collided with : %s"%gameobject)
-        expl = Explosion(self.x, self.y, self.weapon.explosionRadius)
+        expl = Explosion(self.x, self.y, self.weapon.explosion_radius, self.weapon.damage)
         GameObjectHandler.get_instance().add_gameobject(expl)
         GameObjectHandler.get_instance().explosion(expl.get_data())
         self.__finish_projectile()
@@ -99,13 +99,14 @@ class Airstrike(GameObject):
 
         SPEED = 60
         COOLDOWN = 15
-        def __init__(self, x, x_speed_direction, dropoff_x) -> None:
+        def __init__(self, x, x_speed_direction, dropoff_x, weapon_to_dropoff : Weapon, n_drops : int) -> None:
             super().__init__(x, Airstrike.Airplane.HEIGHT, xSpeed = Airstrike.Airplane.SPEED * x_speed_direction)
             self.dropoff_x = dropoff_x
 
             self.dropoff_phase = False
-            self.dropoffs = 0
+            self.dropoffs = n_drops
             self.cooldown = Airstrike.Airplane.COOLDOWN
+            self.weapon_to_dropoff = weapon_to_dropoff
             print(self.dropoff_x)
 
         def update(self):
@@ -115,9 +116,10 @@ class Airstrike(GameObject):
             
             self.cooldown -= 1
             
-            if self.dropoff_phase and self.dropoffs <= Airstrike.DROPOFFS and self.cooldown <= 0:
-                self.dropoffs += 1
-                GameObjectHandler.get_instance().add_gameobject(Projectile(self.x, Airstrike.Airplane.HEIGHT, xSpeed = self.xSpeed, ySpeed = 0, weapon = Weapon.getSmallMissile()))
+            if self.dropoff_phase and self.dropoffs > 0 and self.cooldown <= 0:
+                self.dropoffs -= 1
+                GameObjectHandler.get_instance().add_gameobject(Projectile(self.x, Airstrike.Airplane.HEIGHT, xSpeed = self.xSpeed, ySpeed = 0, 
+                                                                           weapon = self.weapon_to_dropoff))
                 self.cooldown = Airstrike.Airplane.COOLDOWN
 
 
@@ -126,12 +128,13 @@ class Airstrike(GameObject):
 
 
 
-    def __init__(self, x=0, y=0, xSpeed=0, ySpeed=0, has_duration: bool = False, duration: int = 0) -> None:
-        super().__init__(x, y, xSpeed, ySpeed, has_duration, duration)
+    def __init__(self, weapon : TypeOneWeapon) -> None:
+        super().__init__(x=0, y=0, xSpeed=0, ySpeed=0, has_duration=False)
         self.stage = Airstrike.PLANNING_STAGE
 
         self.airplane : Airstrike.Airplane = None
-
+        self.dropoff_weapon = WeaponsManager.get_instance().get_weapon_by_id(weapon.weaponweapon_id_to_drop)
+        self.weapon = weapon
         self.hasCollided = False
 
     def projectile_iteration(self, pos) -> bool:
@@ -145,15 +148,19 @@ class Airstrike(GameObject):
             if planned_x > Globals.SCREEN_WIDTH / 2:
                 self.airplane = Airstrike.Airplane(x = Globals.SCREEN_WIDTH + Airstrike.Airplane.WIDTH,
                                                    x_speed_direction = -1,
-                                                   dropoff_x=planned_x + xfall)
+                                                   dropoff_x=planned_x + xfall,
+                                                   weapon_to_dropoff=self.dropoff_weapon,
+                                                   n_drops=self.weapon.n_drops)
             else:
                 self.airplane = Airstrike.Airplane(x = - Airstrike.Airplane.WIDTH,
                                                    x_speed_direction= 1,
-                                                   dropoff_x=planned_x - xfall)
+                                                   dropoff_x=planned_x - xfall,
+                                                    weapon_to_dropoff=self.dropoff_weapon,
+                                                   n_drops=self.weapon.n_drops)
             GameObjectHandler.get_instance().add_gameobject(self.airplane)
 
     def update(self):
-        if not self.airplane == None and self.airplane.dropoffs >= Airstrike.DROPOFFS:
+        if not self.airplane == None and self.airplane.dropoffs <= 0:
             self.hasCollided = True
             if not self.airplane.has_duration:
                 self.airplane.has_duration = True

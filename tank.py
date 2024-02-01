@@ -3,8 +3,9 @@ from weapons import Weapon
 import math
 from fpsConstants import Globals
 from pygame.draw import ellipse, line
-from utilities import ExplosionData
+from utilities import ExplosionData, DegreeCnvt
 from gameobject import GameObject
+import random
 
 
 class TankInitValues:
@@ -38,15 +39,19 @@ class Tank(GameObject):
     HEIGHT = 8
 
 
-    SPEED = 3*Globals.FPS.FPS
+    SPEED = 90
 
-    def calculateTurretEndPos(tx, ty, angle, width : int = TURRET_WIDTH) -> tuple[int, int]:
-        endPosX = int(round(tx + width/2 + Tank.TURRET_LENGTH * math.cos(angle*180/math.pi)))
-        endPosY = int(round(ty + Tank.TURRET_LENGTH * math.sin(angle*180/math.pi)))
+    MIN_ANGLE = 170
+    MAX_ANGLE = 370
+
+    def calculateTurretEndPos(tx, ty, angle) -> tuple[int, int]:
+        angle = DegreeCnvt.degree_to_radians(angle)
+        endPosX = int(round(tx + Tank.WIDTH/2 + Tank.TURRET_LENGTH * math.cos(angle)))
+        endPosY = int(round(ty + Tank.TURRET_LENGTH * math.sin(angle)))
         return (endPosX, endPosY)
     
 
-    def __init__(self, tx, ty, color, screenwidth, playerNumber):
+    def __init__(self, tx, ty, color, playerNumber, initial_weapons : list[Weapon]):
         super().__init__(x = tx, y = ty, affected_by_gravity=True, collision_class=Globals.CollisionClass.CLASS_TWO, affected_by_explosion=True)
         self.playerNumber = playerNumber    #the player placement wothin the round (when his turn is)
         self.twidth = 20                    #used for drawing the tank: width of the bottom ellipse
@@ -57,22 +62,27 @@ class Tank(GameObject):
         self.fuel = TankInitValues.FUEL          #the fuel for each round
         self.scorePoints = 0                #you can buy stuff with those, also they represent your score
         self.fuelPerMove = 5
-        self.weapons = [Weapon.getSmallMissile(), Weapon.getVulcanoBomb(), Weapon.getBall(), Weapon.getBigBall(), Weapon.getAirstrike()]
+        self.weapons = initial_weapons
         self.currentWeapon = 0
-        #self.weapons = ("Name", explosionRadius, amount, damage)
-        #self.currentWeapon: index of current seleycted weapon
-        self.turretAngle = 90   #math.sin() returns radians, NOT degrees
+
+
+        self.turretAngle = random.randint(Tank.MIN_ANGLE, Tank.MAX_ANGLE)   #math.sin() returns radians, NOT degrees
         #self.turretStartingPosition = (self.x+int(self.twidth/2), self.y)    da die x und y posiition ständig verändert wird ist diese variable irrelevant
 
         self.v0 = 100
         self.v0ChangePerClick = 100
         self.v0Max = 500
         self.maximumSlopeCrossable = 10000
-        self.screen_width = screenwidth
         self.points = 0
         self.tank_graphics = TankGraphics(self.twidth, self.theight, color)
 
 
+    def adjust_turret_angle(self, adjustment : int):
+        newAngle = self.turretAngle + adjustment
+        if newAngle >= Tank.MIN_ANGLE and newAngle <= Tank.MAX_ANGLE:
+            self.turretAngle = newAngle
+
+            
     def get_bounding_box(self) -> tuple[int, int, int, int]:
         return GameObject.BoundingBox.create_bounding_box(self.x, self.y, self.twidth, self.theight)
     
@@ -93,25 +103,24 @@ class Tank(GameObject):
     
     def move(self, leftRight, yWerteTerrain):
         #leftRight is either 1 or -1 to multiply the movement
-        if self.movementPossible(yWerteTerrain) and self.x + Tank.SPEED <= self.screen_width - self.twidth and self.fuel >= self.fuelPerMove:
+        if self.movementPossible(yWerteTerrain) and self.x + Tank.SPEED <= Globals.SCREEN_WIDTH - self.twidth and self.fuel >= self.fuelPerMove:
                 self.x +=  int(Tank.SPEED * leftRight * Globals.FPS.dt)
                 self.fuel -= self.fuelPerMove
     
     def fire(self):
         self.getCurrentWeapon().decrementAmount()
-        
+
         if not self.getCurrentWeapon().hasAmmoLeft():
             self.weapons.pop(self.currentWeapon)
-    
+        self.changeWeapon()
+
     def getCurrentWeapon(self) -> Weapon:
         return self.weapons[self.currentWeapon]
 
             
     def changeWeapon(self):
-        if self.currentWeapon == len(self.weapons)-1:
-            self.currentWeapon = 0
-        else:
-            self.currentWeapon += 1
+        self.currentWeapon = (self.currentWeapon + 1) % len(self.weapons)
+
                 
         
     def resetValues(self):

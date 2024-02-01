@@ -45,7 +45,7 @@ class StartMenuBackground:
         for x in range(amountTanks):
             tankX = randrange(10, screenWidth - 10)
             tankNUmber = 0
-            self.tanks.append(Tank(tankX, self.backgroundTerrain.height[tankX], Colors.black, screenWidth, tankNUmber))
+            self.tanks.append(Tank(tankX, self.backgroundTerrain.height[tankX], Colors.black, tankNUmber, None))
 
         #self, tx, ty, color, screenwidth, playerNumber
         self.gravity = 3

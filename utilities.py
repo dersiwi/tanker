@@ -13,7 +13,7 @@ def message_to_screen_fontObject(win, fontObj, text, color, fontKoordinaten):
 
 
 class DegreeCnvt:
-    CNVT = 180/math.pi
+    CNVT = math.pi/180
     def degree_to_radians(angle_in_degree) -> float:
         return angle_in_degree * DegreeCnvt.CNVT
     
@@ -22,12 +22,12 @@ class DegreeCnvt:
 
 
 class ExplosionData:
-    def __init__(self,x, y, radius) -> None:
+    def __init__(self,x, y, radius, damage) -> None:
         self.x = x
         self.y = y
         self.radius = radius
-        self.damage = 10
-        
+        self.damage = damage
+
     def is_in_radius(self, x, y) -> bool:
         """
         check if the point

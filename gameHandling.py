@@ -5,6 +5,7 @@ from fpsConstants import Globals
 from gameobject import GameObject, GameObjectHandler
 from player import Player
 from tank import Tank
+from weapons import Weapon
 
 import pygame
 import math
@@ -87,15 +88,20 @@ class Game:
     def fire(self):
         if self.stage == Game.STAGE_ONE:
             self.stage = Game.STAGE_TWO
-            self.currentPlayer.fire()
+            
             pos = self.currentPlayer.get_turret_end_pos()
             
-            if self.currentPlayer.getCurrentWeapon().name == "Airstrike":
-                self.projectile = Airstrike()
-            else:
+            weapon_type = self.currentPlayer.getCurrentWeapon().w_type
+            if  weapon_type == Weapon.TYPE_1:
+                self.projectile = Airstrike(self.currentPlayer.getCurrentWeapon())
+            elif weapon_type == Weapon.TYPE_0:
                 vX, vY = Projectile.calculate_xy_speed(self.currentPlayer.turretAngle, self.currentPlayer.v0)
                 self.projectile = Projectile(pos[0], pos[1], vX, vY, self.currentPlayer.getCurrentWeapon())
+            else:
+                raise ValueError("Unknown weapon_type %s"%weapon_type)
+
             self.game_object_handler.add_gameobject(self.projectile)
+            self.currentPlayer.fire()
 
     """
         Handle all key-pressed events that are happening
@@ -116,10 +122,10 @@ class Game:
             self.currentPlayer.move(1, self.terrain.height)
             
         if keys[pygame.K_UP]:
-            self.currentPlayer.turretAngle += 1
+            self.currentPlayer.adjust_turret_angle(5)
             
         if keys[pygame.K_DOWN]:
-            self.currentPlayer.turretAngle -= 1
+            self.currentPlayer.adjust_turret_angle(-5)
             #change player)
 
     def redrawGame(self):

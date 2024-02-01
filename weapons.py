@@ -1,53 +1,91 @@
+import json
 
-class Weapon():
-    #("Name", explosionRadius, amount, damage)
-    def __init__(self, name, damage, amount, explosionRadius):
+
+PATH = "data\\weapons.json"
+
+class Weapon:
+    TYPE_0 = 0
+    TYPE_1 = 1
+    def __init__(self, name, weapon_id, w_type, amount):
         self.name = name
+        self.weapon_id = weapon_id
         self.amount = amount
-        self.damage = damage
-        self.explosionRadius = explosionRadius
-    
+        self.w_type = w_type
+
+    def get_copy(self):
+        pass
+
     def decrementAmount(self):
-        self.amount = self.amount - 1
-    
+        self.amount -= 1
+
     def hasAmmoLeft(self):
-        return self.amount > 0
+        return self.amount >= 1
 
-    def getSmallMissile():
-        return SmallMissile()
+class TypeZeroWeapon(Weapon):
+    def __init__(self, name, weapon_id, w_type, damage, amount, explosion_radius):
+        super().__init__(name, weapon_id, w_type, amount)
+        self.damage = damage
+        self.explosion_radius = explosion_radius
+
+    def get_copy(self):
+        return TypeZeroWeapon(self.name, self.weapon_id, self.w_type, self.damage, self.amount, self.explosion_radius)
+
+
+class TypeOneWeapon(Weapon):
+    def __init__(self, name, weapon_id, w_type, amount, accuracy, weaponweapon_id_to_drop, n_drops):
+        super().__init__(name, weapon_id, w_type, amount)
+        self.accuracy = accuracy
+        self.weaponweapon_id_to_drop = weaponweapon_id_to_drop
+        self.n_drops = n_drops
+
+    def get_copy(self):
+        return TypeOneWeapon(self.name, self.weapon_id, self.w_type, self.amount, self.accuracy, self.weaponweapon_id_to_drop, self.n_drops)
+
     
-    def getVulcanoBomb():
-        return VulcanoBomb()
+class WeaponsManager:
+
+    instance = None
+
+
+    def get_instance():
+        if WeaponsManager.instance == None:
+            WeaponsManager.instance = WeaponsManager(PATH)
+        return WeaponsManager.instance
+
+    def __init__(self, path) -> None:
+        with open(path, "r") as file:
+            data = json.load(file)
+
+        self.weapons : dict[str, list[Weapon]] = {Weapon.TYPE_0 : [],
+                                                  Weapon.TYPE_1 : []}
     
-    def getBall():
-        return Ball()
+        for typezero in data[str(Weapon.TYPE_0)]:
+            self.weapons[Weapon.TYPE_0].append(TypeZeroWeapon(name = typezero["name"],
+                                                        weapon_id = typezero["weapon_id"],
+                                                        w_type = typezero["weapon_type"],
+                                                       damage = typezero["damage"],
+                                                       amount = typezero["initial_amount"],
+                                                       explosion_radius = typezero["explosion_radius"]))
+        for typezero in data[str(Weapon.TYPE_1)]:
+            self.weapons[Weapon.TYPE_1].append(TypeOneWeapon(name = typezero["name"],
+                                            amount = typezero["initial_amount"],
+                                            weapon_id = typezero["weapon_id"],
+                                            w_type = typezero["weapon_type"],
+                                            accuracy=typezero["accuracy"],
+                                            weaponweapon_id_to_drop=typezero["weapon_id_to_drop"],
+                                            n_drops=typezero["n_drops"]))
+            
+    def get_initial_weapons(self) -> list[Weapon]:
+        init_weapons = []
+        for w_type in self.weapons:
+            for weapon in self.weapons[w_type]:
+                if weapon.amount > 0:
+                    init_weapons.append(weapon.get_copy())
+        return init_weapons
     
-    def getBigBall():
-        return BigBall()
-    
-    def getAirstrike():
-        return AS()
-
-    
-
-
-class SmallMissile(Weapon):
-    def __init__(self):
-        super().__init__(name="Small Missile", damage=10, amount=1000, explosionRadius=20)
-
-class VulcanoBomb(Weapon):
-    def __init__(self):
-        super().__init__(name="VulcanoBomb", damage=50, amount=100, explosionRadius=50)
-
-class Ball(Weapon):
-    def __init__(self):
-        super().__init__(name="Ball", damage=200, amount=50, explosionRadius=100)
-
-class BigBall(Weapon):
-    def __init__(self):
-        super().__init__(name="Big Ball", damage=300, amount=10, explosionRadius=300)
-
-class AS(Weapon):
-    def __init__(self):
-        super().__init__(name="Airstrike", damage=300, amount=10, explosionRadius=300) 
-
+    def get_weapon_by_id(self, weaponid : int) -> Weapon:
+        for w_type in self.weapons:
+            for weapon in self.weapons[w_type]:
+                if weapon.weapon_id == weaponid:
+                    return weapon.get_copy()
+        raise ValueError("Could not find weapon with weaponid %s"%weaponid)
