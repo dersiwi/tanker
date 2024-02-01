@@ -1,14 +1,13 @@
-from playerObjects import Terrain, TerrainType, Sun
-from projectile import Projectile
+from environment_objects import Terrain, TerrainType, Sun
+from projectile import Projectile, Airstrike
 from utilities import message_to_screen, Colors, TextButton
-from fpsConstants import FPS
+from fpsConstants import Globals
 from gameobject import GameObject, GameObjectHandler
 from player import Player
 from tank import Tank
 
 import pygame
 import math
-
 
 
 
@@ -29,34 +28,29 @@ class Game:
     STAGE_TWO = 2
 
 
-    def __init__(self, window, w_width, w_height, tanks : list[Tank], terrainType):
+    def __init__(self, window, tanks : list[Tank], terrainType):
 
         self.window = window
-        self.w_width = w_width
-        self.w_height = w_height
-
         self.runGameLoop = True
 
         #-------------gameplay variables
         self.playerTanks : list[Tank] = tanks
-        self.gameObjects : list[GameObject] = []
-        self.go_handler : GameObjectHandler = GameObjectHandler()
+        self.game_object_handler : GameObjectHandler = GameObjectHandler.get_instance()
+        for tank in self.playerTanks:
+            self.game_object_handler.add_gameobject(tank)
+
         self.playerTurn  : int = 0
         self.currentPlayer : Tank = self.playerTanks[self.playerTurn]
 
         #-------------------------------initialize static game objects Sun, Terrain, MenuBar
-        self.sun = Sun(w_width, w_height)
-        self.terrain = Terrain(w_width, w_height, TerrainType(terrainType))
+        self.terrain = Terrain(TerrainType(terrainType))
 
-        self.go_handler.add_gameobject(self.sun)
-        self.go_handler.add_gameobject(self.terrain)
+        self.game_object_handler.add_gameobject(Sun())
+        self.game_object_handler.add_gameobject(self.terrain)
 
-        self.menuBar = MenuBar(screenWidth=w_width, screenHeight=w_height)
-        self.currentPlayerHasFired = False
+        self.menuBar = MenuBar(screenWidth=Globals.SCREEN_WIDTH, screenHeight=Globals.SCREEN_HEIGHT)
         self.projectile = None
-        #--------------constants
 
-        self.gravity = 1.5 * FPS.FPS
     
     """
         Return the next player in playerObjects. A player can only be chosen, if he has > 0 LP
@@ -65,20 +59,16 @@ class Game:
         If <= 1 player are alive this method sets self.runGameLoop to false
     """
     def nextPlayer(self):
-        if len(self.playerTanks) <= 1:
-            self.runGameLoop = False
-            return
-        
-        self.playerTurn = (self.playerTurn + 1) % len(self.playerTanks)
-        self.currentPlayer = self.playerTanks[self.playerTurn]
-        self.currentPlayerHasFired = False
         self.stage = Game.STAGE_ONE
 
-        #this ensures that no dead player can have turns
-        if self.currentPlayer.tLp <= 0:
-            self.playerTanks.remove(self.currentPlayer)
-            self.nextPlayer()
+        for i in range(1, len(self.playerTanks)):
+            self.playerTurn = (self.playerTurn + i) % len(self.playerTanks)
+            self.currentPlayer = self.playerTanks[self.playerTurn]
 
+            if self.currentPlayer.tLp > 0:
+                return
+            
+        self.runGameLoop = False
 
     def checkMouseClickGame(self, pos):
 
@@ -95,18 +85,17 @@ class Game:
             self.fire()
 
     def fire(self):
-        if not self.currentPlayerHasFired:
+        if self.stage == Game.STAGE_ONE:
             self.stage = Game.STAGE_TWO
             self.currentPlayer.fire()
             pos = self.currentPlayer.get_turret_end_pos()
             
-
-            angle = self.currentPlayer.turretAngle
-            SpeedRoundY = self.currentPlayer.v0
-            SpeedRoundX = int(round(self.currentPlayer.v0 * math.cos(angle*180/math.pi)))
-            self.projectile = Projectile(pos[0], pos[1], SpeedRoundX, SpeedRoundY, self.terrain, self.gravity, self.currentPlayer.getCurrentWeapon(), self.playerTanks, self.go_handler)
-            self.go_handler.add_gameobject(self.projectile)
-            self.currentPlayerHasFired = True
+            if self.currentPlayer.getCurrentWeapon().name == "Airstrike":
+                self.projectile = Airstrike()
+            else:
+                vX, vY = Projectile.calculate_xy_speed(self.currentPlayer.turretAngle, self.currentPlayer.v0)
+                self.projectile = Projectile(pos[0], pos[1], vX, vY, self.currentPlayer.getCurrentWeapon())
+            self.game_object_handler.add_gameobject(self.projectile)
 
     """
         Handle all key-pressed events that are happening
@@ -136,13 +125,8 @@ class Game:
     def redrawGame(self):
         #GAME LOOP DRAWING
         #--------------------terrain drawing
-        self.go_handler.draw_gameobjects(self.window)
-        self.menuBar.draw(self.window, self.currentPlayer)
-        
-
-        for tank in self.playerTanks:
-            if tank.tLp > 0:
-                tank.draw(self.window)    
+        self.game_object_handler.draw_gameobjects(self.window)
+        self.menuBar.draw(self.window, self.currentPlayer) 
         pygame.display.update()
     
 
@@ -158,8 +142,28 @@ class Game:
         self.handleKeyPressed(keys = pygame.key.get_pressed())
 
     def __stage_two_iteration(self):
-        self.projectile.projectile_iteration()
+        pos = (-1, -1)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.runGameLoop = False
+                self.quitGame = True
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pos = pygame.mouse.get_pos()
 
+        self.projectile.projectile_iteration(pos)
+        
+
+    def check_if_live(self) -> bool:
+        """this method checks if still more than two players are alive   @return true, if tanks are still alive"""
+        for tank in self.playerTanks:
+            if tank.tLp <= 0 or tank.y >= Globals.SCREEN_HEIGHT:
+                self.game_object_handler.remove_gameobject(tank)
+
+        alive = 0
+        for tank in self.playerTanks:
+            alive += (tank.tLp > 0 and tank.y < Globals.SCREEN_HEIGHT)
+        return alive >= 2
+            
 
     def gameLoop(self):
         """
@@ -183,15 +187,16 @@ class Game:
             else:
                 raise ValueError("Unknown stage %i."%self.stage)
 
-                
             if not self.projectile == None and self.projectile.hasCollided:
-                self.go_handler.remove_gameobject(self.projectile)
                 self.projectile = None
                 self.nextPlayer()
 
+            if not self.check_if_live():
+                self.runGameLoop = False
+
             self.window.fill(Colors.skyblue)
-            self.__check_gravity()            
-            Game.clock.tick(FPS.FPS)
+            self.game_object_handler.update()
+            Game.clock.tick(Globals.FPS.FPS)
 
             #das ist nur eine Provisorische Abfrage um bugs uz vermeiden
             if self.currentPlayer.tLp == 0:
@@ -207,12 +212,12 @@ class Game:
         For each tank, this function checks if a tank is floating in the air and then applies gravity (changes the tank's) y-velocity
         """
         for tank in self.playerTanks:
-            if tank.ty < self.w_height:
-                if tank.ty < self.w_height-(self.terrain.height[tank.tx] + tank.theight -5):
-                    tank.ty += tank.ySpeed
-                    tank.ySpeed += int(self.gravity * FPS.dt)
+            if tank.y < Globals.SCREEN_HEIGHT:
+                if tank.y < Globals.SCREEN_HEIGHT-(self.terrain.height[tank.x] + tank.theight -5):
+                    tank.y += tank.ySpeed
+                    tank.ySpeed += int(Globals.GRAVITY * Globals.FPS.dt)
                 else:
-                    tank.ty = self.w_height-(self.terrain.height[tank.tx] + tank.theight - 5)
+                    tank.y = Globals.SCREEN_HEIGHT-(self.terrain.height[tank.x] + tank.theight - 5)
                     #Tank.tLp -= Tank.ySpeed
                     tank.ySpeed = 0
             else:

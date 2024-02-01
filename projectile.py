@@ -1,80 +1,166 @@
 from gameobject import GameObject, GameObjectHandler
-from pygame.draw import circle
-from fpsConstants import FPS
-from utilities import Colors
-from playerObjects import Terrain
+from pygame.draw import circle, rect
+from pygame.mouse import get_pos
+from fpsConstants import Globals
+from utilities import Colors, DegreeCnvt
+from environment_objects import Terrain
+from utilities import ExplosionData
+from weapons import Weapon
+import math
+
 
 class Explosion(GameObject):
     def __init__(self, x, y, radius):
         super().__init__(x=x, y=y, has_duration=True, duration=2)
-        self.x = x
-        self.y = y
         self.radius = radius
-        self.color = Colors.red
+
+    def get_data(self) -> ExplosionData:
+        return ExplosionData(self.x, self.y, self.radius)
     
     def draw(self, win):
         circle(win, Colors.red, (self.x, self.y), self.radius)
-        circle(win, Colors.orange, (self.x, self.y), int(self.radius/2))
+        circle(win, Colors.orange, (self.x, self.y), int(self.radius/2)) 
 
 class Projectile(GameObject):
-    #collisionObjects are added in here, such that later on the bullet can perform collision detection on these objects as well (e.g. trees or something)
-    def __init__(self, x, y, xSpeed, ySpeed, terrain, gravity, weapon, collisionObjects, go_handler, owner=None):
-        super().__init__(x, y, xSpeed, ySpeed)
+
+    def calculate_xy_speed(angle : float, v0 : float) -> tuple[float, float]:
+        """
+        Calculates vX and vY components of the vector given an anlge in degrees and a force v0 
+
+          /       |
+         / angle  | vX
+        /         |
+        ---------->
+            vY
+        @return vX, vY
+        """
+        angle = DegreeCnvt.degree_to_radians(angle)
+
+        vY = v0 * math.sin(angle)
+        vX = v0 * math.cos(angle)
+        print(vX, vY)
+        return vX, vY
+
+    def __init__(self, x, y, xSpeed, ySpeed, weapon):
+        super().__init__(x, y, xSpeed, ySpeed, affected_by_gravity=True, collision_class=Globals.CollisionClass.CLASS_TWO)
         self.projectileColor = Colors.black
-        self.terrain : Terrain = terrain  #the terrain object, which the bullet could collide with
-        self.weapon = weapon    #the weapon from which the bullet was fired
-        self.gravity = gravity
-
-        self.go_handler : GameObjectHandler = go_handler
-
-        self.owner = owner      #the player who fired the missile 
-
-        self.collisionObjects = collisionObjects #for now this HAS to be all the tanks (=playerObjects), in the future this can become an abstract interface
-        self.collision = False
-
+        self.weapon : Weapon = weapon    #the weapon from which the bullet was fired
         self.hasCollided = False
 
     
-    def projectile_iteration(self) -> bool:
+    def projectile_iteration(self, pos) -> bool:
         """
         @return True, if projectile iteration is done. False If there are still iterations to coem
         """
         return self.hasCollided
     
-
-    def updatePosition(self):
-        self.x += int(self.xSpeed * FPS.dt)
-        self.y -= int(self.ySpeed * FPS.dt)
-        self.ySpeed -= self.gravity
-        if(self.collisionDetection()):
-            self.hasCollided = True
-
+    def get_bounding_box(self) -> tuple[int, int, int, int]:
+        return GameObject.BoundingBox.create_bounding_box(self.x, self.y, 1, 1)
+    
+    def collision(self, gameobject) -> bool:
+        print("Projcetile collided with : %s"%gameobject)
+        expl = Explosion(self.x, self.y, self.weapon.explosionRadius)
+        GameObjectHandler.get_instance().add_gameobject(expl)
+        GameObjectHandler.get_instance().explosion(expl.get_data())
+        self.__finish_projectile()
+        
     def getProjectilePosition(self):
         return (self.x, self.y)
+    
+    def __finish_projectile(self):
+        GameObjectHandler.get_instance().remove_gameobject(self)
+        self.hasCollided = True
 
-    """
-        Does calculations for collision detection of the bullet with other game objects
-    """
-    def collisionDetection(self):
-        #Kollisoinskontrolle für die Kanonenkugel mit dem terrain und anderen Pnazern
-        if self.x > self.terrain.screenWidth or self.x < 0:
-            return True
-
-
-        #kollisionskontrolle mit dem terrain
-        if self.y >= self.terrain.screenHeight - self.terrain.height[self.x]:
-            explosionRadius = self.weapon.explosionRadius
-            self.terrain.explosion(self.x, explosionRadius)
-
-            #schadensverwaltung für panzer im umkreis der Explosion
-            for Tank in self.collisionObjects:
-                if Tank.tx > self.x - explosionRadius and Tank.tx < self.x + explosionRadius:
-                    Tank.tLp -= int(self.weapon.damage/2)
-            self.go_handler.add_gameobject(Explosion(self.x, self.y, explosionRadius))
-            return True
+    def update(self):
+        super().update()
+        if self.x < 0 or self.x > Globals.SCREEN_WIDTH:
+            self.__finish_projectile()
 
 
     def draw(self, window):
         if not self.hasCollided:
-            self.updatePosition()
             circle(window, self.projectileColor, (self.x, self.y), 1)   #pygame function, see import
+
+
+class Airstrike(GameObject):
+    PLANNING_STAGE = 0
+    EXECUTING_STAGE = 1
+    """
+    Airstrike consists of two phases
+    1. Plan the airstrike 
+    2. Airstrike being executed 
+    """
+
+    DROPOFFS = 10
+
+    class Airplane(GameObject):
+        HEIGHT = 200
+        WIDTH = 20
+
+        SPEED = 60
+        COOLDOWN = 15
+        def __init__(self, x, x_speed_direction, dropoff_x) -> None:
+            super().__init__(x, Airstrike.Airplane.HEIGHT, xSpeed = Airstrike.Airplane.SPEED * x_speed_direction)
+            self.dropoff_x = dropoff_x
+
+            self.dropoff_phase = False
+            self.dropoffs = 0
+            self.cooldown = Airstrike.Airplane.COOLDOWN
+            print(self.dropoff_x)
+
+        def update(self):
+            super().update()
+            if (self.x - self.dropoff_x) <= 50:
+                self.dropoff_phase = True
+            
+            self.cooldown -= 1
+            
+            if self.dropoff_phase and self.dropoffs <= Airstrike.DROPOFFS and self.cooldown <= 0:
+                self.dropoffs += 1
+                GameObjectHandler.get_instance().add_gameobject(Projectile(self.x, Airstrike.Airplane.HEIGHT, xSpeed = self.xSpeed, ySpeed = 0, weapon = Weapon.getSmallMissile()))
+                self.cooldown = Airstrike.Airplane.COOLDOWN
+
+
+        def draw(self, win):
+            rect(win, Colors.black, (self.x, self.y, Airstrike.Airplane.WIDTH, 10))
+
+
+
+    def __init__(self, x=0, y=0, xSpeed=0, ySpeed=0, has_duration: bool = False, duration: int = 0) -> None:
+        super().__init__(x, y, xSpeed, ySpeed, has_duration, duration)
+        self.stage = Airstrike.PLANNING_STAGE
+
+        self.airplane : Airstrike.Airplane = None
+
+        self.hasCollided = False
+
+    def projectile_iteration(self, pos) -> bool:
+        if self.stage == Airstrike.PLANNING_STAGE and not pos == (-1, -1):
+            #do airstrike
+            self.stage = Airstrike.EXECUTING_STAGE
+            planned_x, planned_y = pos
+            if planned_y < Airstrike.Airplane.HEIGHT:
+                planned_y = Airstrike.Airplane.HEIGHT + 50
+            xfall = int(Airstrike.Airplane.SPEED * math.sqrt( 2 * (planned_y - Airstrike.Airplane.HEIGHT) / Globals.GRAVITY))
+            if planned_x > Globals.SCREEN_WIDTH / 2:
+                self.airplane = Airstrike.Airplane(x = Globals.SCREEN_WIDTH + Airstrike.Airplane.WIDTH,
+                                                   x_speed_direction = -1,
+                                                   dropoff_x=planned_x + xfall)
+            else:
+                self.airplane = Airstrike.Airplane(x = - Airstrike.Airplane.WIDTH,
+                                                   x_speed_direction= 1,
+                                                   dropoff_x=planned_x - xfall)
+            GameObjectHandler.get_instance().add_gameobject(self.airplane)
+
+    def update(self):
+        if not self.airplane == None and self.airplane.dropoffs >= Airstrike.DROPOFFS:
+            self.hasCollided = True
+            if not self.airplane.has_duration:
+                self.airplane.has_duration = True
+                self.airplane.duration = 200
+            #print("Airplane done, duration left : %i"%self.airplane.duration)
+
+
+    def draw(self, win):
+        if self.stage == Airstrike.PLANNING_STAGE:
+            circle(win, Colors.red, get_pos(), radius=5)

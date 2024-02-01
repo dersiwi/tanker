@@ -1,8 +1,8 @@
 import pygame
 from utilities import message_to_screen, TextButton,Colors
 from tank import Tank
-from playerObjects import Terrain, TerrainType, Sun
-from fpsConstants import FPS
+from environment_objects import Terrain, TerrainType, Sun
+from fpsConstants import Globals
 from random import randrange
 from gameobject import GameObject
 import math
@@ -22,7 +22,7 @@ class Animation():
         self.maxX = w_width - self.width
     
     def updatePosition(self):
-        self.x += int(self.xSpeed * FPS.dt)
+        self.x += int(self.xSpeed * Globals.FPS.dt)
         if self.x > self.maxX:
             self.x = 0
     
@@ -34,8 +34,8 @@ class Animation():
 class StartMenuBackground:
     def __init__(self, screenWidth, screenHeight):
         self.screenHeight = screenHeight
-        self.backgroundTerrain = Terrain(screenWidth, screenHeight, TerrainType(TerrainType.RANDOM))
-        self.backgroundSun = Sun(screenWidth, screenHeight)
+        self.backgroundTerrain = Terrain(TerrainType(TerrainType.RANDOM))
+        self.backgroundSun = Sun()
         self.backgroundSun.move()
         
 
@@ -57,11 +57,11 @@ class StartMenuBackground:
 
     def updatePositions(self):
         for tank in self.tanks:
-            if tank.ty < self.screenHeight-(self.backgroundTerrain.height[tank.tx] + tank.theight -5):
-                tank.ty += tank.ySpeed
-                tank.ySpeed += int(math.ceil(self.gravity * FPS.dt))
+            if tank.y < self.screenHeight-(self.backgroundTerrain.height[tank.x] + tank.theight -5):
+                tank.y += tank.ySpeed
+                tank.ySpeed += int(math.ceil(self.gravity * Globals.FPS.dt))
             else:
-                tank.ty = self.screenHeight-(self.backgroundTerrain.height[tank.tx] + tank.theight - 5)
+                tank.y = self.screenHeight-(self.backgroundTerrain.height[tank.x] + tank.theight - 5)
                 #Tank.tLp -= Tank.ySpeed
                 tank.ySpeed = 0
 
@@ -111,7 +111,7 @@ class TerrainSelector(GameObject):
         self.terrainButtons : list[TextButton] = []
         
         self.colorSelected = Colors.red 
-        self.terrainTypeSelected = None
+        self.terrainTypeSelected = TerrainType.RANDOM
 
 
         for idx, name in enumerate(TerrainType.NAMES):
@@ -303,7 +303,7 @@ class StartMenu:
                     self.checkMouseClick(pygame.mouse.get_pos())
 
             win.fill(Colors.white)
-            StartMenu.clock.tick(FPS.FPS)
+            StartMenu.clock.tick(Globals.FPS.FPS)
             self.drawMenu(win)
             
         if not self.gotoGame:

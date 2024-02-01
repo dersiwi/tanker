@@ -1,5 +1,6 @@
 from pygame.font import SysFont
 from pygame.draw import rect, line
+import math
 
 def message_to_screen(win, msg, color, fontSize, fontKoordinaten):
     font = SysFont(None, fontSize)  #pygame function
@@ -9,6 +10,33 @@ def message_to_screen(win, msg, color, fontSize, fontKoordinaten):
 def message_to_screen_fontObject(win, fontObj, text, color, fontKoordinaten):
     screen_text = fontObj.render(text, True, color)
     win.blit(screen_text, fontKoordinaten)
+
+
+class DegreeCnvt:
+    CNVT = 180/math.pi
+    def degree_to_radians(angle_in_degree) -> float:
+        return angle_in_degree * DegreeCnvt.CNVT
+    
+    def radians_to_degree(angle_in_radians) -> float:
+        return angle_in_radians / DegreeCnvt.CNVT
+
+
+class ExplosionData:
+    def __init__(self,x, y, radius) -> None:
+        self.x = x
+        self.y = y
+        self.radius = radius
+        self.damage = 10
+        
+    def is_in_radius(self, x, y) -> bool:
+        """
+        check if the point
+        @param x,y point to check 
+        @return true if the point is inside the radius of this explosion
+        """
+        return x <= self.x + self.radius and x >= self.x - self.radius and \
+                y <= self.y + self.radius and y >= self.y - self.radius
+    
 
 class Colors:
     #colors

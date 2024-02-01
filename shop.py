@@ -1,7 +1,7 @@
 
 from utilities import Colors, TextButton
 from weapons import Weapon
-from fpsConstants import FPS
+from fpsConstants import Globals
 import pygame
 
 class GameShop:
@@ -67,7 +67,7 @@ class GameShop:
                     self.checkMouseClick(pygame.mouse.get_pos())
             win.fill(Colors.white)
             self.draw(win)
-            GameShop.clock.tick(FPS.FPS)
+            GameShop.clock.tick(Globals.FPS.FPS)
 
             pygame.display.update()
             
