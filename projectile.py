@@ -6,22 +6,10 @@ from utilities import Colors, DegreeCnvt
 from environment_objects import Terrain
 from utilities import ExplosionData
 from weapons import Weapon, TypeOneWeapon, TypeZeroWeapon, WeaponsManager
+from explosions import MushroomCloud, Explosion
 
 import math
 import random
-
-class Explosion(GameObject):
-    def __init__(self, x, y, radius, damage):
-        super().__init__(x=x, y=y, has_duration=True, duration=2)
-        self.radius = radius
-        self.damage = damage
-
-    def get_data(self) -> ExplosionData:
-        return ExplosionData(self.x, self.y, self.radius, self.damage)
-    
-    def draw(self, win):
-        circle(win, Colors.red, (self.x, self.y), self.radius)
-        circle(win, Colors.orange, (self.x, self.y), int(self.radius/2)) 
 
 class Projectile(GameObject):
 
@@ -62,6 +50,7 @@ class Projectile(GameObject):
     def collision(self, gameobject) -> bool:
         print("Projcetile collided with : %s"%gameobject)
         expl = Explosion(self.x, self.y, self.weapon.explosion_radius, self.weapon.damage)
+        #expl = MushroomCloud(self.x, self.y, self.weapon.explosion_radius, self.weapon.damage)
         GameObjectHandler.get_instance().add_gameobject(expl)
         GameObjectHandler.get_instance().explosion(expl.get_data())
         self.__finish_projectile()
