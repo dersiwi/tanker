@@ -49,7 +49,7 @@ class Game:
         self.game_object_handler.add_gameobject(Sun())
         self.game_object_handler.add_gameobject(self.terrain)
 
-        self.menuBar = MenuBar(screenWidth=Globals.SCREEN_WIDTH, screenHeight=Globals.SCREEN_HEIGHT)
+        self.menuBar = MenuBar()
         self.projectile = None
 
     
@@ -116,10 +116,10 @@ class Game:
             self.nextPlayer()
             
         if keys[pygame.K_LEFT]:
-            self.currentPlayer.move(-1, self.terrain.height)
+            self.currentPlayer.move(-1)
                 
         if keys[pygame.K_RIGHT]:
-            self.currentPlayer.move(1, self.terrain.height)
+            self.currentPlayer.move(1)
             
         if keys[pygame.K_UP]:
             self.currentPlayer.adjust_turret_angle(5)
@@ -230,10 +230,10 @@ class Game:
                 tank.tLp = 0
 
 class MenuBar:
-    def __init__(self, screenWidth, screenHeight):
+    def __init__(self):
         self.menuBarColor = (230,238,240)
-        self.width = screenWidth
-        self.height = int(screenHeight*1.5/10)
+        self.width = Globals.SCREEN_WIDTH
+        self.height = int(Globals.SCREEN_HEIGHT*1.5/10)
 
         #(x, y, width, height, text=None, fontSize=12, color=Colors.black
         self.changeWeaponButton = TextButton(x=410, y=25, text="Change Weapon", fontSize=20, color=Colors.grey)

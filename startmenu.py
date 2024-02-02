@@ -45,7 +45,7 @@ class StartMenuBackground:
         for x in range(amountTanks):
             tankX = randrange(10, screenWidth - 10)
             tankNUmber = 0
-            self.tanks.append(Tank(tankX, self.backgroundTerrain.height[tankX], Colors.black, tankNUmber, None))
+            self.tanks.append(Tank(tankX, 50, Colors.black, tankNUmber, None))
 
         #self, tx, ty, color, screenwidth, playerNumber
         self.gravity = 3
@@ -57,11 +57,11 @@ class StartMenuBackground:
 
     def updatePositions(self):
         for tank in self.tanks:
-            if tank.y < self.screenHeight-(self.backgroundTerrain.height[tank.x] + tank.theight -5):
+            if tank.y < self.screenHeight-(self.backgroundTerrain.simple_height[tank.x] + tank.theight -5):
                 tank.y += tank.ySpeed
                 tank.ySpeed += int(math.ceil(self.gravity * Globals.FPS.dt))
             else:
-                tank.y = self.screenHeight-(self.backgroundTerrain.height[tank.x] + tank.theight - 5)
+                tank.y = self.screenHeight-(self.backgroundTerrain.simple_height[tank.x] + tank.theight - 5)
                 #Tank.tLp -= Tank.ySpeed
                 tank.ySpeed = 0
 
@@ -79,9 +79,9 @@ class StartMenuBackground:
     def randomAction(self):
         if self.actionDuration > 0:
             if self.action == 0:
-                self.actingTank.move(1, self.backgroundTerrain.height)
+                self.actingTank.move(1)
             if self.action == 1:
-                self.actingTank.move(-1, self.backgroundTerrain.height)
+                self.actingTank.move(-1)
                 
             self.actionDuration -= 1
         else:

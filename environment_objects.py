@@ -58,7 +58,11 @@ class Terrain(GameObject):
         self.screenHeight = Globals.SCREEN_HEIGHT
 
         self.terrain_type = terrain_type
-        self.height, self.slope = self.terrain_type.generate_height_map(self.screenWidth)
+        self.simple_height, self.slope = self.terrain_type.generate_height_map(self.screenWidth)
+
+        self.multiple_height_lines : list[int] = []
+
+        self.height : list[list[tuple[int, int]]] = [[] for i in range(self.screenWidth)]
 
 
     def collision(self, gameobject : GameObject) -> bool:
@@ -66,8 +70,23 @@ class Terrain(GameObject):
         """When collidinth with the terrain the terrain sets the gamobject ontop of itself and its ySpeed to zero"""
         
         bb = gameobject.get_bounding_box()
-        gameobject.y = self.screenHeight - max(self.height[gameobject.x], self.height[gameobject.x + bb[GameObject.BoundingBox.WIDTH]]) - bb[GameObject.BoundingBox.HEIGHT]
+        lowest_y = gameobject.y + bb[GameObject.BoundingBox.HEIGHT]
+        for i in [gameobject.x, gameobject.x + gameobject.x + bb[GameObject.BoundingBox.WIDTH]]:
+            if i < 0 or i >= len(self.height):
+                continue
+            if i in self.multiple_height_lines:
+                #do collisiont detection for multiple heights
+                for (line_max, line_min) in self.height[i]:
+                    if line_max > lowest_y and line_min <= lowest_y:
+                        gameobject.y = line_min - bb[GameObject.BoundingBox.HEIGHT]
+
+            else:
+                gameobject.y = self.screenHeight - max(self.simple_height[gameobject.x], self.simple_height[gameobject.x + bb[GameObject.BoundingBox.WIDTH]]) - bb[GameObject.BoundingBox.HEIGHT]
         gameobject.ySpeed = 0
+
+    def __multiple_height_collision(self, gameobject):
+        raise NotImplementedError("Collsions for multiple heights not implemented yet.")
+        pass
     
     def collision_detecetion(self, gameobject: GameObject):
         """If an object collides with the terrain, the terrain sets its ySpeed to zero 
@@ -83,13 +102,31 @@ class Terrain(GameObject):
         bb = gameobject.get_bounding_box()
         if gameobject.x < 0 or gameobject.x + bb[GameObject.BoundingBox.WIDTH] >= len(self.height) or bb == GameObject.NO_BOUNDING_BOX:
             return False
+    
         
         #check if "lowest" y-values of object are below highest value of self.height.
         lowest_y = gameobject.y + bb[GameObject.BoundingBox.HEIGHT]
-        if lowest_y >= self.screenHeight - self.height[gameobject.x] or gameobject.y >= self.screenHeight - self.height[gameobject.x + bb[GameObject.BoundingBox.WIDTH]]:
+        for i in range(gameobject.x, gameobject.x + gameobject.x + bb[GameObject.BoundingBox.WIDTH]):
+            if i in self.multiple_height_lines:
+                #do collision detection for multiple heights
+                for (line_max, line_min) in self.height[i]:
+                    if line_max > lowest_y and line_min <= lowest_y:
+                        return True
+                return False
+        
+        lowest_y = gameobject.y + bb[GameObject.BoundingBox.HEIGHT]
+        if lowest_y >= self.screenHeight - self.simple_height[gameobject.x] or \
+            gameobject.y >= self.screenHeight - self.simple_height[gameobject.x + bb[GameObject.BoundingBox.WIDTH]]:
             return True
         return False
+    
+    def __collision_multiple_height_lines(self, gameobject):
+        """perform a collision check if there are multiple height lines."""
+        return False
+        raise NotImplementedError("Collision-detection for multiple height liens not implemented yet")
+
         
+
     def explosion_funky(self, expl : ExplosionData):
         x = expl.x
         y = expl.y
@@ -100,11 +137,7 @@ class Terrain(GameObject):
                 continue
             xV_explosion = abs(x-xV)
             yV_explosion = int(round(math.sqrt(r**2 - xV_explosion**2)))
-            #print("Explosion xV, xY = %s, %s"%(xV_explosion, yV_explosion))
-            #print("Height at xV : %i, newheight %i"%(Globals.SCREEN_HEIGHT - self.height[xV], y + yV_explosion))
-
             self.height[xV] = max(y + yV_explosion, Globals.SCREEN_HEIGHT - self.height[xV])
-            #print(self.height[xV])
 
     def explosion(self, expl : ExplosionData):
         x = expl.x
@@ -116,16 +149,54 @@ class Terrain(GameObject):
                 continue
             xV_explosion = abs(x-xV)
             yV_explosion = int(round(math.sqrt(r**2 - xV_explosion**2)))
-            #print("Explosion xV, xY = %s, %s"%(xV_explosion, yV_explosion))
-            #print("Height at xV : %i, newheight %i"%(Globals.SCREEN_HEIGHT - self.height[xV], y + yV_explosion))
 
-            self.height[xV] = Globals.SCREEN_HEIGHT - max(y + yV_explosion, Globals.SCREEN_HEIGHT - self.height[xV])
-            #print(self.height[xV])
+            ymax = y + yV_explosion
+            ymin = y - yV_explosion
+            
+            
+            if xV in self.multiple_height_lines:
+                new_lines = []
+                for idx, (line_max, line_min) in enumerate(self.height[xV]):
+                    if line_min > ymax:
+                        new_lines.append((line_max, line_min))
+                        continue
+
+                    if ymin <= line_min and ymax >= line_max:
+                        #explosion is bigger than complete line, pop it
+                        continue
+                    
+                    if ymin >= line_min and ymax <= line_max:
+                        #explision is right between a line and therefore splits it 
+                        new_lines.append((line_max, ymax))
+                        new_lines.append((ymin, line_min))
+                        continue
+
+                    if ymin < line_min and ymax <= line_max:
+                        new_lines.append((line_max, ymax))
+                        continue
+
+                    if ymin > line_min and ymax > line_max:
+                        new_lines.append((ymin, line_min))
+                self.height[xV] = new_lines
+
+            else:
+                #implemented explosion for simple height, enable multiple-line splitting
+                line_min = self.screenHeight - self.simple_height[xV]
+                line_max = self.screenHeight
+                if ymin <= line_min and ymax >= line_min:
+                    self.simple_height[xV] = self.screenHeight - ymax
+                if ymin >= line_min and ymax <= line_max:
+                    self.multiple_height_lines.append(xV)
+                    self.height[xV].append((line_max, ymax))
+                    self.height[xV].append((ymin, line_min))
 
     def draw(self, window):
-        for x in range(self.screenWidth):
-            line(window, self.terrain_type.get_color(), (x, self.screenHeight), (x, self.screenHeight-self.height[x]), 1)
-
+        for x, height in enumerate(self.simple_height):
+            if x in self.multiple_height_lines:
+                for (beginY, endY) in self.height[x]:
+                    line(window, self.terrain_type.get_color(), (x, beginY), (x, endY), 1)
+            else:
+                line(window, self.terrain_type.get_color(), (x, self.screenHeight), (x, self.screenHeight-height), 1)
 
 
 #-------------------------------------------------------------_TERRAIN AND SUN------------------------------------

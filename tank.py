@@ -9,7 +9,7 @@ import random
 
 
 class TankInitValues:
-    FUEL = 500
+    FUEL = 5000
     LP = 100
     TURRET_ANGLE = 45
 
@@ -44,6 +44,10 @@ class Tank(GameObject):
     MIN_ANGLE = 170
     MAX_ANGLE = 370
 
+    MIN_V0 = 25
+    MAX_V0 = 600
+    V0CHANGE_PER_CLICK = 25
+
     def calculateTurretEndPos(tx, ty, angle) -> tuple[int, int]:
         angle = DegreeCnvt.degree_to_radians(angle)
         endPosX = int(round(tx + Tank.WIDTH/2 + Tank.TURRET_LENGTH * math.cos(angle)))
@@ -69,9 +73,9 @@ class Tank(GameObject):
         self.turretAngle = random.randint(Tank.MIN_ANGLE, Tank.MAX_ANGLE)   #math.sin() returns radians, NOT degrees
         #self.turretStartingPosition = (self.x+int(self.twidth/2), self.y)    da die x und y posiition ständig verändert wird ist diese variable irrelevant
 
-        self.v0 = 100
-        self.v0ChangePerClick = 100
-        self.v0Max = 500
+        self.v0 = 250
+
+
         self.maximumSlopeCrossable = 10000
         self.points = 0
         self.tank_graphics = TankGraphics(self.twidth, self.theight, color)
@@ -90,22 +94,12 @@ class Tank(GameObject):
         if expl.is_in_radius(self.x, self.y) or expl.is_in_radius(self.x+Tank.WIDTH, self.y):
             self.tLp -= expl.damage
 
-        
-    def movementPossible(self, yWerte):
-        #this function calculates if the slope is too high for a tank to move to
-        if self.x + Tank.SPEED > len(yWerte)-1 or self.x + Tank.SPEED < 0:
-            return False
-        else:
-            if yWerte[self.x] - yWerte[self.x+Tank.SPEED] <= self.maximumSlopeCrossable:
-                return True
-            else:
-                return False
-    
-    def move(self, leftRight, yWerteTerrain):
+           
+    def move(self, leftRight):
         #leftRight is either 1 or -1 to multiply the movement
-        if self.movementPossible(yWerteTerrain) and self.x + Tank.SPEED <= Globals.SCREEN_WIDTH - self.twidth and self.fuel >= self.fuelPerMove:
-                self.x +=  int(Tank.SPEED * leftRight * Globals.FPS.dt)
-                self.fuel -= self.fuelPerMove
+        if self.x + Tank.SPEED <= Globals.SCREEN_WIDTH - self.twidth and self.fuel >= self.fuelPerMove:
+            self.x +=  int(Tank.SPEED * leftRight * Globals.FPS.dt)
+            self.fuel -= self.fuelPerMove
     
     def fire(self):
         self.getCurrentWeapon().decrementAmount()
@@ -130,10 +124,10 @@ class Tank(GameObject):
         self.turretAngle = TankInitValues.TURRET_ANGLE
 
     def changeV(self, n):
-        if self.v0 + self.v0ChangePerClick * n < 0 or self.v0 + self.v0ChangePerClick * n > self.v0Max:
-            return
-        else:
-            self.v0 += n * self.v0ChangePerClick
+        new_v0 = self.v0 + Tank.V0CHANGE_PER_CLICK * n
+        if new_v0 >= Tank.MIN_V0 or new_v0 <= Tank.V0CHANGE_PER_CLICK:
+            self.v0 = new_v0
+            
 
     def get_turret_end_pos(self) -> tuple[int, int]:
         """Calculates the current end-position of the turret of this tank"""
