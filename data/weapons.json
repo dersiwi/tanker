@@ -75,5 +75,17 @@
             "cooldown" : 5,
             "weapon_id" : 8
         }
+    ],
+    "2" : [
+        {
+            "name" : "Vulcano Bomb Small",
+            "initial_amount" : 2,
+            "weapon_type" : 2,
+            "n_cluster_projectiles" : 3,
+            "v0" : 150,
+            "cluster_weapon_id" : 0,
+            "weapon_id" : 9
+
+        }
     ]
 }

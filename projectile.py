@@ -5,7 +5,7 @@ from fpsConstants import Globals
 from utilities import Colors, DegreeCnvt
 from environment_objects import Terrain
 from utilities import ExplosionData
-from weapons import Weapon, TypeOneWeapon, TypeZeroWeapon, WeaponsManager
+from weapons import Weapon, TypeOneWeapon, TypeZeroWeapon, WeaponsManager, TypeTwoWeapon
 from explosions import MushroomCloud, Explosion
 
 import math
@@ -53,25 +53,51 @@ class Projectile(GameObject):
         #expl = MushroomCloud(self.x, self.y, self.weapon.explosion_radius, self.weapon.damage)
         GameObjectHandler.get_instance().add_gameobject(expl)
         GameObjectHandler.get_instance().explosion(expl.get_data())
-        self.__finish_projectile()
+        self._finish_projectile()
         
     def getProjectilePosition(self):
         return (self.x, self.y)
     
-    def __finish_projectile(self):
+    def _finish_projectile(self):
         GameObjectHandler.get_instance().remove_gameobject(self)
         self.hasCollided = True
 
     def update(self):
         super().update()
         if self.x < 0 or self.x > Globals.SCREEN_WIDTH:
-            self.__finish_projectile()
+            self._finish_projectile()
 
 
     def draw(self, window):
         if not self.hasCollided:
             circle(window, self.projectileColor, (self.x, self.y), 1)   #pygame function, see import
 
+class VulcanoBomb(Projectile):
+
+    def __init__(self, x, y, xSpeed, ySpeed, weapon : TypeTwoWeapon):
+        super().__init__(x, y, xSpeed, ySpeed, None)
+        self.projectileColor = Colors.black
+        self.weapon : TypeTwoWeapon = weapon    #the weapon from which the bullet was fired
+        self.hasCollided = False
+
+    
+    def projectile_iteration(self, pos) -> bool:
+        """
+        @return True, if projectile iteration is done. False If there are still iterations to coem
+        """
+        return self.hasCollided
+    
+    def get_bounding_box(self) -> tuple[int, int, int, int]:
+        return GameObject.BoundingBox.create_bounding_box(self.x, self.y, 1, 1)
+    
+    def collision(self, gameobject) -> bool:
+        print("Vulcano-bomb collided with : %s"%gameobject)
+        self._finish_projectile()
+        for i in range(self.weapon.n_cluster_projectiles):
+            xSpeed, ySpeed = Projectile.calculate_xy_speed(angle = random.randint(190,350), v0 = self.weapon.v0)
+            p = Projectile(self.x, self.y - i * 5, xSpeed, ySpeed, weapon = WeaponsManager.get_instance().get_weapon_by_id(weaponid = 0)) 
+            GameObjectHandler.get_instance().add_gameobject(p)
+ 
 
 class Airstrike(GameObject):
     PLANNING_STAGE = 0

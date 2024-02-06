@@ -1,5 +1,5 @@
 from environment_objects import Terrain, TerrainType, Sun
-from projectile import Projectile, Airstrike
+from projectile import Projectile, Airstrike, VulcanoBomb
 from utilities import message_to_screen, Colors, TextButton
 from fpsConstants import Globals
 from gameobject import GameObject, GameObjectHandler
@@ -97,6 +97,9 @@ class Game:
             elif weapon_type == Weapon.TYPE_0:
                 vX, vY = Projectile.calculate_xy_speed(self.currentPlayer.turretAngle, self.currentPlayer.v0)
                 self.projectile = Projectile(pos[0], pos[1], vX, vY, self.currentPlayer.getCurrentWeapon())
+            elif weapon_type == Weapon.TYPE_2:
+                vX, vY = Projectile.calculate_xy_speed(self.currentPlayer.turretAngle, self.currentPlayer.v0)
+                self.projectile = VulcanoBomb(pos[0], pos[1], vX, vY, self.currentPlayer.getCurrentWeapon())
             else:
                 raise ValueError("Unknown weapon_type %s"%weapon_type)
 

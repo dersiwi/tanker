@@ -71,17 +71,16 @@ class Terrain(GameObject):
         
         bb = gameobject.get_bounding_box()
         lowest_y = gameobject.y + bb[GameObject.BoundingBox.HEIGHT]
-        for i in [gameobject.x, gameobject.x + gameobject.x + bb[GameObject.BoundingBox.WIDTH]]:
-            if i < 0 or i >= len(self.height):
-                continue
-            if i in self.multiple_height_lines:
+        collision_x = int(gameobject.x + bb[GameObject.BoundingBox.WIDTH] / 2)
+        if collision_x < 0 or collision_x >= len(self.height):
+            return
+        if collision_x in self.multiple_height_lines:
                 #do collisiont detection for multiple heights
-                for (line_max, line_min) in self.height[i]:
-                    if line_max > lowest_y and line_min <= lowest_y:
-                        gameobject.y = line_min - bb[GameObject.BoundingBox.HEIGHT]
-
-            else:
-                gameobject.y = self.screenHeight - max(self.simple_height[gameobject.x], self.simple_height[gameobject.x + bb[GameObject.BoundingBox.WIDTH]]) - bb[GameObject.BoundingBox.HEIGHT]
+            for (line_max, line_min) in self.height[collision_x]:
+                if line_max > lowest_y and line_min <= lowest_y:
+                    gameobject.y = line_min - bb[GameObject.BoundingBox.HEIGHT]
+        else:
+            gameobject.y = self.screenHeight - self.simple_height[collision_x] - bb[GameObject.BoundingBox.HEIGHT]
         gameobject.ySpeed = 0
 
     def __multiple_height_collision(self, gameobject):
@@ -106,19 +105,15 @@ class Terrain(GameObject):
         
         #check if "lowest" y-values of object are below highest value of self.height.
         lowest_y = gameobject.y + bb[GameObject.BoundingBox.HEIGHT]
-        for i in range(gameobject.x, gameobject.x + gameobject.x + bb[GameObject.BoundingBox.WIDTH]):
-            if i in self.multiple_height_lines:
-                #do collision detection for multiple heights
-                for (line_max, line_min) in self.height[i]:
-                    if line_max > lowest_y and line_min <= lowest_y:
-                        return True
-                return False
+        collision_x = int(gameobject.x + bb[GameObject.BoundingBox.WIDTH] / 2)
+        if collision_x in self.multiple_height_lines:
+            #do collision detection for multiple heights
+            for (line_max, line_min) in self.height[collision_x]:
+                if line_max > lowest_y and line_min <= lowest_y:
+                    return True
+            return False
         
-        lowest_y = gameobject.y + bb[GameObject.BoundingBox.HEIGHT]
-        if lowest_y >= self.screenHeight - self.simple_height[gameobject.x] or \
-            gameobject.y >= self.screenHeight - self.simple_height[gameobject.x + bb[GameObject.BoundingBox.WIDTH]]:
-            return True
-        return False
+        return lowest_y >= self.screenHeight - self.simple_height[collision_x]
     
     def __collision_multiple_height_lines(self, gameobject):
         """perform a collision check if there are multiple height lines."""

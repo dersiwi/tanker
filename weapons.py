@@ -6,6 +6,7 @@ PATH = "data\\weapons.json"
 class Weapon:
     TYPE_0 = 0
     TYPE_1 = 1
+    TYPE_2 = 2
     def __init__(self, name, weapon_id, w_type, amount):
         self.name = name
         self.weapon_id = weapon_id
@@ -42,7 +43,15 @@ class TypeOneWeapon(Weapon):
     def get_copy(self):
         return TypeOneWeapon(self.name, self.weapon_id, self.w_type, self.amount, self.accuracy, self.weaponweapon_id_to_drop, self.n_drops, self.cooldown)
 
-    
+class TypeTwoWeapon(Weapon):
+    def __init__(self, name, weapon_id, w_type, amount, n_cluster_projectiles, v0, cluster_weapon_id):
+        super().__init__(name, weapon_id, w_type, amount)
+        self.n_cluster_projectiles = n_cluster_projectiles
+        self.v0 = v0
+        self.cluster_weapon_id = cluster_weapon_id
+
+    def get_copy(self):
+        return TypeTwoWeapon(self.name, self.weapon_id, self.w_type, self.amount, self.n_cluster_projectiles, self.v0, self.cluster_weapon_id)
 class WeaponsManager:
 
     instance = None
@@ -58,7 +67,8 @@ class WeaponsManager:
             data = json.load(file)
 
         self.weapons : dict[str, list[Weapon]] = {Weapon.TYPE_0 : [],
-                                                  Weapon.TYPE_1 : []}
+                                                  Weapon.TYPE_1 : [],
+                                                  Weapon.TYPE_2 : []}
     
         for typezero in data[str(Weapon.TYPE_0)]:
             self.weapons[Weapon.TYPE_0].append(TypeZeroWeapon(name = typezero["name"],
@@ -76,6 +86,15 @@ class WeaponsManager:
                                             weaponweapon_id_to_drop=typezero["weapon_id_to_drop"],
                                             n_drops=typezero["n_drops"],
                                             cooldown=typezero["cooldown"]))
+
+        for typetwo in data[str(Weapon.TYPE_2)]:
+            self.weapons[Weapon.TYPE_2].append(TypeTwoWeapon(name = typetwo["name"],
+                                            amount = typetwo["initial_amount"],
+                                            weapon_id = typetwo["weapon_id"],
+                                            w_type = typetwo["weapon_type"],
+                                            n_cluster_projectiles=typetwo["n_cluster_projectiles"],
+                                            v0 = typetwo["v0"],
+                                            cluster_weapon_id=typetwo["cluster_weapon_id"]))
             
     def get_initial_weapons(self) -> list[Weapon]:
         init_weapons = []

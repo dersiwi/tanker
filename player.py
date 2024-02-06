@@ -4,3 +4,6 @@ class Player:
         self.color = color
         self.points = 0
         self.tank = None
+
+    def iteration():
+        pass
