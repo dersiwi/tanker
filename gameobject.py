@@ -125,8 +125,13 @@ class GameObjectHandler:
         self.collision_classes[gameobject.collision_class].append(gameobject)
 
     def remove_gameobject(self, gameobject : GameObject):
-        self.collision_classes[gameobject.collision_class].remove(gameobject)
-        self.gameObjects.remove(gameobject)
+        try:
+            self.collision_classes[gameobject.collision_class].remove(gameobject)
+            self.gameObjects.remove(gameobject)
+        except Exception as e:
+            print(gameobject)
+            print(e.args)
+
 
 
     def explosion(self, expl : ExplosionData):

@@ -80,6 +80,8 @@ class Tank(GameObject):
         self.points = 0
         self.tank_graphics = TankGraphics(self.twidth, self.theight, color)
 
+        self.removed_from_objecthandler = False
+
 
     def adjust_turret_angle(self, adjustment : int):
         newAngle = self.turretAngle + adjustment
@@ -93,7 +95,6 @@ class Tank(GameObject):
     def explosion(self, expl : ExplosionData):
         if expl.is_in_radius(self.x, self.y) or expl.is_in_radius(self.x+Tank.WIDTH, self.y):
             self.tLp -= expl.damage
-
            
     def move(self, leftRight):
         #leftRight is either 1 or -1 to multiply the movement

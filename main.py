@@ -4,10 +4,10 @@ import random
 #from terrainClass import terrain
 from tank import Tank, TankInitValues
 from gameHandling import Game
-from startmenu import StartMenu
+from startmenu import StartMenu, PlayerSelector
 from shop import GameShop
 from utilities import Colors
-from player import Player
+from player import Player, HumanPlayer, RandomPlayer
 from fpsConstants import Globals
 from weapons import WeaponsManager
 pygame.init()
@@ -23,17 +23,23 @@ pygame.display.set_caption("Tanker")
 
 
 
-def create_tanks(player_amount):
+def create_tanks(player_types):
     player = []
     playerTanks = []
     colors = Colors.playerColors
     colorCounter = 0
-    for x in range(player_amount):
-        p = Player(x, colors[colorCounter])
+    for x, ptype in enumerate(player_types):
 
         randomX = random.randint(0, 740)
         T = Tank(randomX,100, colors[colorCounter], x + 1, initial_weapons=WeaponsManager.get_instance().get_initial_weapons())
-        p.tank = T
+
+        if ptype == PlayerSelector.PlayerType.HUMAN:
+            p = HumanPlayer(name=x, color=colors[colorCounter], tank=T)
+        elif ptype == PlayerSelector.PlayerType.RANDOM:
+            p = RandomPlayer(name=x, color=colors[colorCounter], tank=T)
+        elif ptype == PlayerSelector.PlayerType.AI:
+            raise NotImplementedError("Ai not implemented yet")
+
 
         player.append(p)
         playerTanks.append(T)
@@ -53,8 +59,8 @@ def main():
     #gameplay
     while True:
         #game = Game(window=win, w_width=w_width, w_height=w_height, terrainType=startingMenu.terrainTypeSelected)
-        player, playerTanks = create_tanks(startingMenu.player_selector.get_n_players())
-        game = Game(window=win, tanks=playerTanks, terrainType=startingMenu.terrain_selector.terrainTypeSelected)
+        player, playerTanks = create_tanks(startingMenu.player_selector.get_player_types())
+        game = Game(window=win, players=player, terrainType=startingMenu.terrain_selector.terrainTypeSelected)
         game.gameLoop()
 
         #gameShop = GameShop(w_width, w_height)

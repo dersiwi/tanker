@@ -209,6 +209,12 @@ class PlayerSelector(GameObject):
 
     def get_n_players(self):
         return len(self.player_buttons)
+    
+    def get_player_types(self) -> list[int]:
+        """
+        @return a list of player_types @see PlayerSelector.PlayerType for information
+        """
+        return self.player_type
 
     
     def draw(self, win):
