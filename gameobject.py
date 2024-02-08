@@ -115,10 +115,15 @@ class GameObjectHandler:
         if GameObjectHandler.handler == None:
             GameObjectHandler.handler = GameObjectHandler()
         return GameObjectHandler.handler
+    
+    def destroy_instance():
+        """Destroys the instance and makes get_instance return a new instance."""
+        GameObjectHandler.handler = None
 
     def __init__(self) -> None:
         self.gameObjects : list[GameObject] = []
         self.collision_classes : list[list[GameObject]] = [[] for collision_class in Globals.CollisionClass.CLASSES]
+    
 
     def add_gameobject(self, gameobject : GameObject):
         self.gameObjects.append(gameobject)

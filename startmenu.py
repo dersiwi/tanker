@@ -3,9 +3,10 @@ from utilities import message_to_screen, TextButton,Colors
 from tank import Tank
 from environment_objects import Terrain, TerrainType, Sun
 from fpsConstants import Globals
-from random import randrange
+
 from gameobject import GameObject
-import math
+import math, random
+from gameobject import GameObjectHandler
 
 
 
@@ -34,43 +35,34 @@ class Animation():
 class StartMenuBackground:
     def __init__(self, screenWidth, screenHeight):
         self.screenHeight = screenHeight
+        self.go_handler = GameObjectHandler.get_instance()
+        
         self.backgroundTerrain = Terrain(TerrainType.RANDOM)
+        self.go_handler.add_gameobject(self.backgroundTerrain)
+
         self.backgroundSun = Sun()
         self.backgroundSun.move()
         
+        
 
         #birng life into the game 
-        amountTanks = randrange(2, 5)
+
         self.tanks = []
-        for x in range(amountTanks):
-            tankX = randrange(10, screenWidth - 10)
-            tankNUmber = 0
-            self.tanks.append(Tank(tankX, 50, Colors.black, tankNUmber, None))
+        for x in range(random.randint(2, 4)):
+            t = Tank(tx = random.randint(10, screenWidth - 10), ty = 50, color = Colors.black, playerNumber= 0, initial_weapons=None)
+            self.go_handler.add_gameobject(t)
+            self.tanks.append(t)
 
         #self, tx, ty, color, screenwidth, playerNumber
-        self.gravity = 3
         self.action = -1
         self.actionDuration = 0
         self.projectile = None
-        self.actingTank = None
-
-
-    def updatePositions(self):
-        for tank in self.tanks:
-            if tank.y < self.screenHeight-(self.backgroundTerrain.simple_height[tank.x] + tank.theight -5):
-                tank.y += tank.ySpeed
-                tank.ySpeed += int(math.ceil(self.gravity * Globals.FPS.dt))
-            else:
-                tank.y = self.screenHeight-(self.backgroundTerrain.simple_height[tank.x] + tank.theight - 5)
-                #Tank.tLp -= Tank.ySpeed
-                tank.ySpeed = 0
+        self.actingTank : Tank = None
 
     def chooseRandomAction(self):
-        actionChance = randrange(0, 100)
-
-        if actionChance < 10:
-            self.actingTank = self.tanks[randrange(0, len(self.tanks))]
-            self.action = randrange(0,3)
+        if random.randint(0, 100) < 10:
+            self.actingTank = self.tanks[random.randint(0, len(self.tanks) - 1)]
+            self.action = random.randint(0,2)
             
             if self.action == 0 or self.action == 1: # drive around
                 self.actionDuration = 20
@@ -89,11 +81,10 @@ class StartMenuBackground:
 
     def draw(self, win):
         win.fill(Colors.skyblue)
-        self.backgroundTerrain.draw(win)
         self.backgroundSun.draw(win)
-        for t in self.tanks:
-            t.draw(win)
-        self.updatePositions()
+        self.go_handler.draw_gameobjects(win)
+        self.go_handler.update()
+
         self.randomAction()
 
 

@@ -2,7 +2,7 @@ import pygame
 import random
 #from tankClass import Tank
 #from terrainClass import terrain
-from tank import Tank, TankInitValues
+from tank import Tank
 from gameHandling import Game
 from startmenu import StartMenu, PlayerSelector
 from shop import GameShop
@@ -10,6 +10,7 @@ from utilities import Colors
 from player import Player, HumanPlayer, RandomPlayer
 from fpsConstants import Globals
 from weapons import WeaponsManager
+from gameobject import GameObjectHandler
 pygame.init()
 pygame.font.init()
 
@@ -58,6 +59,7 @@ def main():
     
     #gameplay
     while True:
+        GameObjectHandler.destroy_instance()
         player, playerTanks = create_tanks(startingMenu.player_selector.get_player_types())
         game = Game(window=win, players=player, terrain_id=startingMenu.terrain_selector.terrainTypeSelected)
         game.gameLoop()
@@ -66,6 +68,6 @@ def main():
         #gameShop.runGameShop(win)
 
         #for tank in playerTanks:
-        #    tank.tLp = TankInitValues.LP
+        #    tank.tLp = .LTankInitValuesP
 
 main()
