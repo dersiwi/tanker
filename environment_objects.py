@@ -5,61 +5,75 @@ from gameobject import GameObject
 from pygame.draw import line, circle
 from utilities import ExplosionData
 
-
+import json
 
 class TerrainType:
 
-    WOODS = 0
-    DESERT = 1
-    RANDOM = 2
+    RANDOM = -1
 
-    NAMES = ["Woods", "Desert", "Random"]
-    IDXS = [WOODS, DESERT, RANDOM]
+    instance = None
+    def get_instance():
+        if TerrainType.instance == None:
+            TerrainType.instance=TerrainType()
+        return TerrainType.instance
 
-    def __init__(self, terrain_type : int) -> None:
-        self.type = terrain_type
-        if terrain_type == TerrainType.RANDOM:
-            self.type = random.randint(0,1)
+    def __init__(self) -> None:
+        with open("data/terrains.json", "r") as file:
+            self.data = json.load(file)
+        self.terrains : list[tuple[str, tuple[int, int, int], list[int]]] = []
+        for id in self.data:
+            self.terrains.append(self.__load_terrain_from_datadict(int(id)))
 
+    def get_all_terrain_names(self):
+        names = []
+        for terrain in self.terrains:
+            names.append(terrain[0])
+        return names
+    
+    def get_n_terrains(self) -> int:
+        return len(self.terrains)
+    
+    def get_terrain(self, id : int):
+        if id == TerrainType.RANDOM:
+            id = random.randint(0, len(self.terrains) - 1)
+        return self.terrains[id]
+    
 
-    def get_color(self):
-        if self.type == TerrainType.WOODS:
-            return (0, 153, 0)  #forrest green
-        elif self.type == TerrainType.DESERT:
-            return (219,209,180) # sand
-        else:
-            raise ValueError("Type %s does not have a color"%(self.type))
-        
-
-    def generate_height_map(self, screen_width : int) -> tuple[list[int],list[int]]:
+    def __load_terrain_from_datadict(self, id : int) -> tuple[str, tuple[int, int, int], list[int]]:
         """
-        @param screen_width -> width of the screen
-        This method generates a height for each pixel on the screen
-        @return two listst L, S where L[i] is the height of the terrain at pixel i and S[i] is the slope of the terrain at pixel i
-        @return a list  L of integers, such that  L[i] is the height ax pixel i
-        """
-        height = []
-        slope = []
-        for x in range(screen_width):
-            y = int(round(30*math.sin(x/100)+175))
-            s = int(round(30*math.cos(x/100)))
-            height.append(y)
-            slope.append(s)
-        return height, slope
+        This function loads a terrain form the terrain-json file. 
+        A terrain-dict consists of multiple fields;
+            - color
+            - name 
+            - height-functions (that can be evaluated with eval()). 
+                - Example of a function can be : 5 * 2.71**x - 10
+            - intervals for height functions
+                - an array of [a,b] where a and b are integers. The 
 
+        """
+        terr = self.data[str(id)]
+        color = tuple(terr["rgb-color-value"])
+        name = terr["name"]
+        heightmap : list[int] = []
+        functions = terr["height-functions"]
+        intervals = terr["intervals"]
+        assert len(functions) == len(intervals)
+        curr_func = 0
+        for x in range(0, Globals.SCREEN_WIDTH):
+            heightmap.append(
+                int(eval(functions[curr_func], {"math" : math, "x" : x}))
+            )
+            if x > intervals[curr_func][1]:
+                curr_func += 1
+        return name, color, heightmap
 class Terrain(GameObject):
 
-    WOODS = 0
-    DESERT = 1
-    RANDOM = 2
-    def __init__(self, terrain_type : TerrainType):
+    def __init__(self, terrain_id : int ):
         super().__init__(collision_class=Globals.CollisionClass.CLASS_ONE, affected_by_explosion = True)
         self.screenWidth = Globals.SCREEN_WIDTH
         self.screenHeight = Globals.SCREEN_HEIGHT
 
-        self.terrain_type = terrain_type
-        self.simple_height, self.slope = self.terrain_type.generate_height_map(self.screenWidth)
-
+        _, self.terrain_color, self.simple_height = TerrainType.get_instance().get_terrain(terrain_id)
         self.multiple_height_lines : list[int] = []
 
         self.height : list[list[tuple[int, int]]] = [[] for i in range(self.screenWidth)]
@@ -152,6 +166,10 @@ class Terrain(GameObject):
             if xV in self.multiple_height_lines:
                 new_lines = []
                 for idx, (line_max, line_min) in enumerate(self.height[xV]):
+                    #if ymin > line_max or ymax < line_min:
+                        #in this case the explosion is either below or above the height line
+                    #    continue
+
                     if line_min > ymax:
                         new_lines.append((line_max, line_min))
                         continue
@@ -189,9 +207,9 @@ class Terrain(GameObject):
         for x, height in enumerate(self.simple_height):
             if x in self.multiple_height_lines:
                 for (beginY, endY) in self.height[x]:
-                    line(window, self.terrain_type.get_color(), (x, beginY), (x, endY), 1)
+                    line(window, self.terrain_color, (x, beginY), (x, endY), 1)
             else:
-                line(window, self.terrain_type.get_color(), (x, self.screenHeight), (x, self.screenHeight-height), 1)
+                line(window, self.terrain_color, (x, self.screenHeight), (x, self.screenHeight-height), 1)
 
 
 #-------------------------------------------------------------_TERRAIN AND SUN------------------------------------

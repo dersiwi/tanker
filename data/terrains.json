@@ -1,0 +1,26 @@
+{
+    "0" : {
+        "rgb-color-value" : [219, 209, 180],
+        "name" : "desert-curvy",
+        "height-functions" : ["100*math.sin(x/100)+175"],
+        "intervals" : [[0, 900]]
+    },
+    "1" : {
+        "rgb-color-value" : [0, 153, 0],
+        "name" : "woods-mid-curvy",
+        "height-functions" : ["30*math.sin(x/100)+175"],
+        "intervals" : [[0, 900]]
+    },
+    "2" : {
+        "rgb-color-value" : [166, 221, 232],
+        "name" : "snow-funky",
+        "height-functions" : ["2**(x/50) + 40", "50", "175", "10*x / 100", "30*math.sin(x/100)+175"],
+        "intervals" : [[0, 7],[8, 125], [126, 200], [201, 700] ,[701, 900]]
+    },
+    "3" : {
+        "rgb-color-value" : [0, 153, 0],
+        "name" : "desert-exponential",
+        "height-functions" : ["10+2**(x / 100)"],
+        "intervals" : [[0,900]]
+    }
+}

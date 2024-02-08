@@ -58,9 +58,8 @@ def main():
     
     #gameplay
     while True:
-        #game = Game(window=win, w_width=w_width, w_height=w_height, terrainType=startingMenu.terrainTypeSelected)
         player, playerTanks = create_tanks(startingMenu.player_selector.get_player_types())
-        game = Game(window=win, players=player, terrainType=startingMenu.terrain_selector.terrainTypeSelected)
+        game = Game(window=win, players=player, terrain_id=startingMenu.terrain_selector.terrainTypeSelected)
         game.gameLoop()
 
         #gameShop = GameShop(w_width, w_height)

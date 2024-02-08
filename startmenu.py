@@ -34,7 +34,7 @@ class Animation():
 class StartMenuBackground:
     def __init__(self, screenWidth, screenHeight):
         self.screenHeight = screenHeight
-        self.backgroundTerrain = Terrain(TerrainType(TerrainType.RANDOM))
+        self.backgroundTerrain = Terrain(TerrainType.RANDOM)
         self.backgroundSun = Sun()
         self.backgroundSun.move()
         
@@ -114,7 +114,7 @@ class TerrainSelector(GameObject):
         self.terrainTypeSelected = TerrainType.RANDOM
 
 
-        for idx, name in enumerate(TerrainType.NAMES):
+        for idx, name in enumerate(TerrainType.get_instance().get_all_terrain_names()):
             terrainButton = TextButton(x = self.x, y = int(self.y + self.dterrainBlock * (idx + 2)), text = name, fontSize=self.fontsize, border=True, margin=int(self.fontsize / 5))
             terrainButton.addBackground()
             self.terrainButtons.append(terrainButton)
@@ -293,9 +293,12 @@ class StartMenu:
         else:
             raise ValueError("Illegal mode %i in startmenu"%self.mode)
         pygame.display.update()
+        #pygame.image.save(win, "images/images_for_startscreen_gif/img%.3i.png"%self.counter)
+        #self.counter += 1
 
 
     def runMenu(self, win):
+        #self.counter = 0
         while self.runMenuBool:
             #pygame.time.delay(100)
                 

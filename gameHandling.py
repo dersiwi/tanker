@@ -28,7 +28,7 @@ class Game:
     STAGE_TWO = 2
 
 
-    def __init__(self, window, players : list[Player], terrainType):
+    def __init__(self, window, players : list[Player], terrain_id : int):
 
         self.window = window
         self.runGameLoop = True
@@ -45,7 +45,7 @@ class Game:
 
 
         #-------------------------------initialize static game objects Sun, Terrain, MenuBar
-        self.terrain = Terrain(TerrainType(terrainType))
+        self.terrain = Terrain(terrain_id)
 
         self.game_object_handler.add_gameobject(Sun())
         self.game_object_handler.add_gameobject(self.terrain)
