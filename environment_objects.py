@@ -1,5 +1,6 @@
 import math
 import random
+from tank import Tank
 from fpsConstants import Globals
 from gameobject import GameObject
 from pygame.draw import line, circle
@@ -114,7 +115,6 @@ class Terrain(GameObject):
 
     def collision(self, gameobject : GameObject) -> bool:
         #When collidinth with the terrain the terrain sets the gamobject ontop of itself and its ySpeed to zero
-        
         bb = gameobject.get_bounding_box()
         lowest_y = gameobject.y + bb[GameObject.BoundingBox.HEIGHT]
         collision_x = int(gameobject.x + bb[GameObject.BoundingBox.WIDTH] / 2)
@@ -122,7 +122,7 @@ class Terrain(GameObject):
             return
 
         for (line_max, line_min) in self.height[collision_x]:
-            if line_max > lowest_y and line_min <= lowest_y:
+            if line_max > lowest_y and line_min <= lowest_y and type(gameobject) == Tank:
                 gameobject.y = line_min - bb[GameObject.BoundingBox.HEIGHT]
 
         gameobject.ySpeed = 0
