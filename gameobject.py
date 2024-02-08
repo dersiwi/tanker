@@ -36,6 +36,9 @@ class GameObject:
         self.x = x
         self.y = y
 
+        self.prev_x = x
+        self.prev_y = y
+
         self.hasSpeed = True
         self.xSpeed = xSpeed
         self.ySpeed = ySpeed
@@ -49,6 +52,9 @@ class GameObject:
         self.affected_by_explosion : bool = affected_by_explosion
 
     def update(self):
+        self.prev_x = self.x
+        self.prev_y = self.y
+        
         self.x += int(self.xSpeed * Globals.FPS.dt)
         self.y += int(self.ySpeed * Globals.FPS.dt)
 
@@ -125,9 +131,17 @@ class GameObjectHandler:
         self.collision_classes : list[list[GameObject]] = [[] for collision_class in Globals.CollisionClass.CLASSES]
     
 
-    def add_gameobject(self, gameobject : GameObject):
+    def add_gameobject(self, gameobject : GameObject, priority_insert : bool = False):
+        """
+        Adds a gameobject to the handler.
+        @param gameobject ot add
+        @param priority_insert : adds the object infront of the cue for collision_classes
+        """
         self.gameObjects.append(gameobject)
-        self.collision_classes[gameobject.collision_class].append(gameobject)
+        if not priority_insert:
+            self.collision_classes[gameobject.collision_class].append(gameobject)
+        else:
+            self.collision_classes[gameobject.collision_class].insert(0, gameobject)
 
     def remove_gameobject(self, gameobject : GameObject):
         try:
@@ -199,8 +213,7 @@ class GameObjectHandler:
             gameobject_lowest, gameobject_highest = (go1, go2) if go1.y < go2.y else (go2, go1)
             #because the "lower" it gets on the screen, the higher the y-coordinate gets, thats why this has to be an aboslute value
             #as the gameobject_lowest.y - gameobject_highest.y is negative
-            if abs(gameobject_lowest.y - gameobject_highest.y)  <= gameobject_lowest.get_bounding_box()[GameObject.BoundingBox.HEIGHT]:
-                return True
+            return abs(gameobject_lowest.y - gameobject_highest.y)  <= gameobject_lowest.get_bounding_box()[GameObject.BoundingBox.HEIGHT]
         return False
 
     def draw_gameobjects(self, win):

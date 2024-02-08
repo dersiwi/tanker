@@ -1,6 +1,6 @@
 from environment_objects import Terrain, TerrainType, Sun
 from projectile import Projectile, Airstrike, VulcanoBomb
-from utilities import Colors
+from utilities import Colors, message_to_screen
 from fpsConstants import Globals
 from gameobject import GameObjectHandler
 from player import Player, HumanPlayer
@@ -52,6 +52,8 @@ class Game:
 
         self.menuBar = MenuBar()
         self.projectile = None
+
+        self.show_help_menu : bool = False
 
     
     """
@@ -120,8 +122,9 @@ class Game:
                 self.quitGame = True
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
-
-        if self.current_player.gameloop_iteration(keys_pressed=pygame.key.get_pressed(), mouse_position=mouse_pos):
+        keys = pygame.key.get_pressed()
+        self.show_help_menu = keys[pygame.K_h]
+        if self.current_player.gameloop_iteration(keys_pressed= keys, mouse_position=mouse_pos):
             self.fire()
 
     def __stage_two_iteration(self):
@@ -151,6 +154,11 @@ class Game:
                 alive += 1
         return alive >= 2
     
+
+    def display_help_menu(self):
+        helpstrings = ["Move left      : <", "Move right     : >", "Turret right   : up", "Turret down    : down", "deploy shield  : s", "fire           : space"]
+        for i, helpstring in enumerate(helpstrings):
+            message_to_screen(self.window, msg=helpstring, color=Colors.black, fontSize=25, fontKoordinaten=(300, 200 + i * 25))
 
             
 
@@ -185,6 +193,8 @@ class Game:
                 self.runGameLoop = False
 
             self.window.fill(Colors.skyblue)
+            if self.show_help_menu:
+                self.display_help_menu()
             self.game_object_handler.update()
             Game.clock.tick(Globals.FPS.FPS)
 

@@ -82,6 +82,9 @@ class HumanPlayer(Player):
         if keys[pygame.K_DOWN]:
             self.tank.adjust_turret_angle(-5)
 
+        if keys[pygame.K_s]:
+            self.tank.deploy_shield()
+
 
 class RandomPlayer(Player):
 

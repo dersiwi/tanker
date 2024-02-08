@@ -2,9 +2,9 @@
 from weapons import Weapon
 import math
 from fpsConstants import Globals
-from pygame.draw import ellipse, line
+from pygame.draw import ellipse, line, circle, rect
 from utilities import ExplosionData, DegreeCnvt
-from gameobject import GameObject
+from gameobject import GameObject, GameObjectHandler
 import random
 
 
@@ -82,6 +82,9 @@ class Tank(GameObject):
 
         self.removed_from_objecthandler = False
 
+        #shilds
+        self.shield : Shield = Shield(self)
+
 
     def adjust_turret_angle(self, adjustment : int):
         newAngle = self.turretAngle + adjustment
@@ -133,6 +136,55 @@ class Tank(GameObject):
     def get_turret_end_pos(self) -> tuple[int, int]:
         """Calculates the current end-position of the turret of this tank"""
         return Tank.calculateTurretEndPos(self.x, self.y, self.turretAngle)
+    
+
+    def deploy_shield(self):
+        if not self.shield == None:
+            GameObjectHandler.get_instance().add_gameobject(self.shield)
+            self.shield = None
        
     def draw(self, window):
         self.tank_graphics.draw(window, self.x, self.y, self.get_turret_end_pos())
+
+
+class Shield(GameObject):
+
+    TOLERANCE = 10
+
+    def __init__(self, ownertank : Tank) -> None:
+        super().__init__(affected_by_explosion=True, collision_class = Globals.CollisionClass.CLASS_ONE)
+        self.radius = 50
+        self.ownertank : Tank = ownertank
+        self.health = 100
+
+    def collision_detecetion(self, gameobject: GameObject):
+        if type(gameobject) == Tank:
+            return False
+        if self.__is_inside(gameobject.x, gameobject.y) and self.__is_inside(gameobject.prev_x, gameobject.prev_y):
+            return False
+        return self.__is_inside(gameobject.x, gameobject.y) 
+    
+    def explosion(self, expl : ExplosionData):
+        if abs(expl.x - self.x) <= self.radius + Shield.TOLERANCE and abs(expl.y - self.y) <= self.radius + Shield.TOLERANCE:
+            print("shield health : %s"%self.health)
+            self.health -= expl.damage
+        
+        if self.health <= 0:
+            GameObjectHandler.get_instance().remove_gameobject(self)
+        
+    def __is_inside(self, x, y):
+        return abs(x - self.x) <= self.radius and abs(y - self.y) <= self.radius
+
+    def collision(self, gameobject : GameObject):
+        gameobject.x = gameobject.prev_x
+        gameobject.y = gameobject.prev_y
+        pass
+
+    
+    def update(self):
+        self.x = int(self.ownertank.x + self.ownertank.twidth / 2)
+        self.y = int(self.ownertank.y + self.ownertank.theight / 2)
+
+
+    def draw(self, window):
+        circle(window, (0,0, 255), (self.x, self.y), self.radius, width = 1)
