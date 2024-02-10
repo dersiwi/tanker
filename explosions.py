@@ -1,8 +1,7 @@
 
-from utilities import ExplosionData
-from gameobject import GameObject, GameObjectHandler
-from pygame.draw import circle, rect
-from utilities import Colors, DegreeCnvt
+from gameobject import GameObject
+from pygame.draw import circle
+from utilities import Colors, DegreeCnvt, ExplosionData
 import math
 
 

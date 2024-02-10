@@ -2,7 +2,7 @@ import pygame
 import random
 #from tankClass import Tank
 #from terrainClass import terrain
-from tank import Tank
+from core_objects import Tank
 from gameHandling import Game
 from startmenu import StartMenu, PlayerSelector
 from shop import GameShop
@@ -32,7 +32,7 @@ def create_tanks(player_types):
     for x, ptype in enumerate(player_types):
 
         randomX = random.randint(0, 740)
-        T = Tank(randomX,100, colors[colorCounter], x + 1, initial_weapons=WeaponsManager.get_instance().get_initial_weapons())
+        T = Tank(randomX,100, colors[colorCounter], initial_weapons=WeaponsManager.get_instance().get_initial_weapons())
 
         if ptype == PlayerSelector.PlayerType.HUMAN:
             p = HumanPlayer(name=x, color=colors[colorCounter], tank=T)

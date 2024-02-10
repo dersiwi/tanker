@@ -1,6 +1,5 @@
-from tank import Tank
+from core_objects import Tank
 from menubar import MenuBar
-from gameobject import GameObject
 from fpsConstants import Globals
 
 import random
@@ -84,7 +83,8 @@ class HumanPlayer(Player):
 
         if keys[pygame.K_s]:
             self.tank.deploy_shield()
-
+        if keys[pygame.K_m]:
+            self.tank.deploy_mine()
 
 class RandomPlayer(Player):
 

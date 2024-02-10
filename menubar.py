@@ -1,7 +1,7 @@
 import pygame
 from fpsConstants import Globals
 from utilities import TextButton, message_to_screen, Colors
-from tank import Tank
+from core_objects import Tank, TankGlobals
 
 class MenuBar:
     def __init__(self):
@@ -24,18 +24,16 @@ class MenuBar:
 
         #--drawing the current player
         currentPlayer.tank_graphics.draw(win, 0, currentPlayer.tank_graphics.turretheight, Tank.calculateTurretEndPos(0,currentPlayer.tank_graphics.turretheight, currentPlayer.turretAngle))
-        #pygame.draw.ellipse(win, currentPlayer.tcolor, (0, currentPlayer.turretheight, currentPlayer.twidth, currentPlayer.theight), 0)
-        #pygame.draw.ellipse(win, currentPlayer.tcolor, (int((currentPlayer.twidth-currentPlayer.turretwidth)/2), 5,currentPlayer.turretwidth,currentPlayer.turretheight),0)
 
-        message_to_screen(win, str(currentPlayer.playerNumber), Colors.black, 20, (currentPlayer.twidth+5,0))
+        message_to_screen(win, str(0), Colors.black, 20, (TankGlobals.WIDTH+5,0))
 
         #--the fuel and the left and right buttons
-        message_to_screen(win, str("Fuel: " + str(currentPlayer.fuel)), Colors.black, 20, (currentPlayer.twidth+5, 15))
+        message_to_screen(win, str("Fuel: " + str(currentPlayer.fuel)), Colors.black, 20, (TankGlobals.WIDTH+5, 15))
         #left button is missing
         #right button is missing
 
         #--Livepoints
-        message_to_screen(win, str("LP: " + str(currentPlayer.tLp)), Colors.black, 20, (currentPlayer.twidth+5, 30))
+        message_to_screen(win, str("LP: " + str(currentPlayer.tLp)), Colors.black, 20, (TankGlobals.WIDTH+5, 30))
 
         #--Weapons and Amount
         stringWeapons = str(currentPlayer.getCurrentWeapon().amount) + " : "

@@ -1,9 +1,8 @@
 import pygame
 from utilities import message_to_screen, TextButton,Colors
-from tank import Tank
-from environment_objects import Terrain, TerrainType, Sun
+from core_objects import Tank, Terrain, Sun
+from core_object_utilities import TerrainType
 from fpsConstants import Globals
-
 from gameobject import GameObject
 import math, random
 from gameobject import GameObjectHandler
@@ -49,7 +48,7 @@ class StartMenuBackground:
 
         self.tanks = []
         for x in range(random.randint(2, 4)):
-            t = Tank(tx = random.randint(10, screenWidth - 10), ty = 50, color = Colors.black, playerNumber= 0, initial_weapons=None)
+            t = Tank(tx = random.randint(10, screenWidth - 10), ty = 50, color = Colors.black, initial_weapons=None)
             self.go_handler.add_gameobject(t)
             self.tanks.append(t)
 

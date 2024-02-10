@@ -1,4 +1,4 @@
-from environment_objects import Terrain, TerrainType, Sun
+from core_objects import Terrain, Sun
 from projectile import Projectile, Airstrike, VulcanoBomb
 from utilities import Colors, message_to_screen
 from fpsConstants import Globals

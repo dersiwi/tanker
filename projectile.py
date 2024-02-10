@@ -3,10 +3,8 @@ from pygame.draw import circle, rect
 from pygame.mouse import get_pos
 from fpsConstants import Globals
 from utilities import Colors, DegreeCnvt
-from environment_objects import Terrain
-from utilities import ExplosionData
 from weapons import Weapon, TypeOneWeapon, TypeZeroWeapon, WeaponsManager, TypeTwoWeapon
-from explosions import MushroomCloud, Explosion
+from explosions import Explosion
 
 import math
 import random
@@ -204,3 +202,4 @@ class Airstrike(GameObject):
     def draw(self, win):
         if self.stage == Airstrike.PLANNING_STAGE:
             circle(win, Colors.red, get_pos(), radius=5)
+
