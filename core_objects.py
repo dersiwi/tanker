@@ -1,6 +1,6 @@
 from gameobject import GameObject, GameObjectHandler
 from utilities import DegreeCnvt, ExplosionData, Colors
-from weapons import Weapon
+from weapons import Weapon, Weapon_Executor
 from fpsConstants import Globals
 from core_object_utilities import TerrainType, TankGlobals, TankGraphics
 from explosions import Explosion
@@ -204,6 +204,8 @@ class Tank(GameObject):
         self.shield : Shield = Shield(self)
         self.mines : int = 1
 
+        self.removed_from_objecthandler = False
+
 
     def adjust_turret_angle(self, adjustment : int):
         newAngle = self.turretAngle + adjustment
@@ -236,9 +238,7 @@ class Tank(GameObject):
 
             
     def changeWeapon(self):
-        self.currentWeapon = (self.currentWeapon + 1) % len(self.weapons)
-
-                
+        self.currentWeapon = (self.currentWeapon + 1) % len(self.weapons)                
         
     def resetValues(self):
         #this function is used if a new round begins, all basic values need to be resetted.
@@ -250,7 +250,6 @@ class Tank(GameObject):
         new_v0 = self.v0 + TankGlobals.V0CHANGE_PER_CLICK * n
         if new_v0 >= TankGlobals.MIN_V0 and new_v0 <= TankGlobals.MAX_V0:
             self.v0 = new_v0
-            
 
     def get_turret_end_pos(self) -> tuple[int, int]:
         """Calculates the current end-position of the turret of this tank"""
@@ -270,6 +269,9 @@ class Tank(GameObject):
        
     def draw(self, window):
         self.tank_graphics.draw(window, self.x, self.y, self.get_turret_end_pos())
+
+    def get_weapon_executor(self) -> Weapon_Executor:
+        return self.weapons[self.currentWeapon].get_weapons_executor((self.x, self.y), self.get_turret_end_pos(), self.v0, self.turretAngle)
 
 class Shield(GameObject):
 

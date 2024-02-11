@@ -1,10 +1,9 @@
 from core_objects import Terrain, Sun
-from projectile import Projectile, Airstrike, VulcanoBomb
 from utilities import Colors, message_to_screen
 from fpsConstants import Globals
 from gameobject import GameObjectHandler
 from player import Player, HumanPlayer
-from weapons import Weapon
+from weapons import Weapon_Executor
 from menubar import MenuBar
 
 import pygame
@@ -51,7 +50,7 @@ class Game:
         self.game_object_handler.add_gameobject(self.terrain)
 
         self.menuBar = MenuBar()
-        self.projectile = None
+        self.projectile : Weapon_Executor = None
 
         self.show_help_menu : bool = False
 
@@ -83,20 +82,7 @@ class Game:
 
             currentPlayerTank = self.current_player.tank
             
-            pos = currentPlayerTank.get_turret_end_pos()
-            
-            weapon_type = currentPlayerTank.getCurrentWeapon().w_type
-            if  weapon_type == Weapon.TYPE_1:
-                self.projectile = Airstrike(currentPlayerTank.getCurrentWeapon())
-            elif weapon_type == Weapon.TYPE_0:
-                vX, vY = Projectile.calculate_xy_speed(currentPlayerTank.turretAngle, currentPlayerTank.v0)
-                self.projectile = Projectile(pos[0], pos[1], vX, vY, currentPlayerTank.getCurrentWeapon())
-            elif weapon_type == Weapon.TYPE_2:
-                vX, vY = Projectile.calculate_xy_speed(currentPlayerTank.turretAngle, currentPlayerTank.v0)
-                self.projectile = VulcanoBomb(pos[0], pos[1], vX, vY, currentPlayerTank.getCurrentWeapon())
-            else:
-                raise ValueError("Unknown weapon_type %s"%weapon_type)
-
+            self.projectile = currentPlayerTank.get_weapon_executor()
             self.game_object_handler.add_gameobject(self.projectile)
             currentPlayerTank.fire()
 
@@ -137,8 +123,8 @@ class Game:
                 pos = pygame.mouse.get_pos()
 
         if not type(self.current_player) == HumanPlayer:
-        
             pos = self.current_player.get_pos_for_projectile()
+
         self.projectile.projectile_iteration(pos)
         
 

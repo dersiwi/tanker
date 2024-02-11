@@ -5,7 +5,7 @@ from fpsConstants import Globals
 import random
 import pygame
 class Player:
-    def __init__(self, name, color, tank) -> None:
+    def __init__(self, name, color, tank : Tank) -> None:
         self.tank : Tank = tank
         self.fired = False
 
