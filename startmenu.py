@@ -39,11 +39,7 @@ class StartMenuBackground:
         self.backgroundTerrain = Terrain(TerrainType.RANDOM)
         self.go_handler.add_gameobject(self.backgroundTerrain)
 
-        self.backgroundSun = Sun()
-        self.backgroundSun.move()
-        
-        
-
+        self.backgroundSun = Sun(angleSpeed = Sun.NORMAL_MOVING_SPEED)
         #birng life into the game 
 
         self.tanks = []
@@ -65,7 +61,7 @@ class StartMenuBackground:
             
             if self.action == 0 or self.action == 1: # drive around
                 self.actionDuration = 20
-                
+
 
     def randomAction(self):
         if self.actionDuration > 0:

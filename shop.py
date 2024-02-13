@@ -1,66 +1,84 @@
 
-from utilities import Colors, TextButton
-from weapons import Weapon
+from utilities import Colors, TextButton, message_to_screen
+from weapons import Weapon, WeaponsManager
 from fpsConstants import Globals
 import pygame
+from player import Player
+from core_objects import Tank
 
 class GameShop:
 
+    START_X = int(Globals.SCREEN_WIDTH * 1 / 8)
+    START_Y = int(Globals.SCREEN_WIDTH * 1 / 4)
+    FONTSIZE = 24
+    BUTTON_MARGIN = 5
+
+
+
     clock = pygame.time.Clock()
-    def __init__(self, screenWidth, screenHeight):
+    def __init__(self, players):
+
+        self.players : list[Player] = players
+        self.current_player = 0
 
         self.runningGameShop = True
-        self.gotoGame = True
 
-        self.shopButtonMargins = 5
+        self.curr_weapon_type = Weapon.TYPE_0
 
-        self.startXForButtons = int(screenWidth * 1 / 8)
-        self.startYForButtons = int(screenHeight * 1 / 4)
-        self.anticipatedYDistance = 50
-        self.itemFontSize = 24
+        self.weapons_buttons : dict[int, list[TextButton]] = {}
+        self.__create_weapons_buttons()
+        self.resumePlaying : TextButton = self.__generate_shopbutton(int((Globals.SCREEN_WIDTH - 200) / 2), int(Globals.SCREEN_HEIGHT * 3/4), 
+                                           "Next Player", Colors.green)
+        
+        self.switchWeaponType : TextButton = self.__generate_shopbutton(GameShop.START_X, int(Globals.SCREEN_HEIGHT * 1/4),
+                                                                        "switch weapon type",  Colors.grey)
 
-        self.buttonWidth = 200
-        #x, y, text=None, fontSize=12, color=Colors.black
-        self.smallMissileButton = TextButton(self.startXForButtons, 0, Weapon.getSmallMissile().name ,self.itemFontSize)
-        self.vulcanoBombButton = TextButton(self.startXForButtons, 0, Weapon.getVulcanoBomb().name, self.itemFontSize)
-        self.ballButton = TextButton(self.startXForButtons, 0, Weapon.getBall().name, self.itemFontSize)
-        self.bigBallButton = TextButton(self.startXForButtons, 0, Weapon.getBigBall().name, self.itemFontSize)
 
-        self.shopButtons = [self.smallMissileButton, self.vulcanoBombButton, self.ballButton, self.bigBallButton]
+    def __generate_shopbutton(self, x, y, text, color):
+        return TextButton(x, y, text, GameShop.FONTSIZE, color, border=True, margin=GameShop.BUTTON_MARGIN)
 
-        #set the distance for all buttons
-        for x in range(len(self.shopButtons)):
-            self.shopButtons[x].y = self.startYForButtons + x * self.anticipatedYDistance
-
-        for b in self.shopButtons:
-            b.addBackground()
-            b.setMargin(self.shopButtonMargins)
-            b.addBorder()
-            b.setWidth(self.buttonWidth)
-
-        #return to playing button
-        self.resumePlayingWidth = 200
-        self.resumePlayingFontSize = 30
-        self.resumePlaying = TextButton(int((screenWidth - self.resumePlayingWidth) / 2), int(screenHeight * 3/4), "Resume playing", self.resumePlayingFontSize, Colors.green)
-        self.resumePlaying.setMargin(self.shopButtonMargins)
-        self.resumePlaying.addBorder()
-        self.resumePlaying.setWidth(self.resumePlayingWidth)
-
-        self.shopButtons.append(self.resumePlaying)
-        pass
-
+    def __create_weapons_buttons(self):
+        wm = WeaponsManager.get_instance()
+        for weapon_type in Weapon.TYPES:
+            self.weapons_buttons[weapon_type] = []
+            for i, weapon in enumerate(wm.weapons[weapon_type]):
+                self.weapons_buttons[weapon_type].append(
+                    self.__generate_shopbutton(GameShop.START_X, GameShop.START_Y + i * 2 * GameShop.FONTSIZE, weapon.name, Colors.black))
+                
     def checkMouseClick(self, pos):
         if self.resumePlaying.isClicked(pos):
-            self.runningGameShop = False
-        pass
+            if self.current_player < len(self.players) - 2:
+                self.current_player += 1
+            elif self.current_player == len(self.players) - 2:
+                self.current_player += 1
+                self.resumePlaying.setText("Resume Game")
+            elif self.current_player >= len(self.players) - 1:
+                #last players turn is now finished
+                self.runningGameShop = False
+
+        if self.switchWeaponType.isClicked(pos):
+            self.curr_weapon_type = (self.curr_weapon_type + 1) % len(Weapon.TYPES)
+        for idx, weapon_button in enumerate(self.weapons_buttons[self.curr_weapon_type]):
+            if weapon_button.isClicked(pos):
+                print("Player %s bought %s - pricing not implemeneted yet"%(self.players[self.current_player].name, weapon_button.text))
+                self.__add_weapon_to_player(WeaponsManager.get_instance().weapons[self.curr_weapon_type][idx].get_copy())
+
+    def __add_weapon_to_player(self, weapon : Weapon):
+        for we in self.players[self.current_player].weapons:
+            if we.name == weapon.name:
+                we.amount += weapon.amount
+                return
+        self.players[self.current_player].weapons.append(weapon)
+        
 
     def runGameShop(self, win):
+        gotoGame = True
         while self.runningGameShop:
                 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.runningGameShop = False
-                    self.gotoGame = False
+                    gotoGame = False
                     continue
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     #print(pygame.mouse.get_pos())
@@ -70,12 +88,21 @@ class GameShop:
             GameShop.clock.tick(Globals.FPS.FPS)
 
             pygame.display.update()
-            
-        if not self.gotoGame:
+        if not gotoGame:
             pygame.quit()
 
     def draw(self, win):
-        for b in self.shopButtons:
-            b.draw(win)
+        message_to_screen(win, "Player : %s"%self.players[self.current_player].name, color = Colors.black, fontSize=GameShop.FONTSIZE, 
+                          fontKoordinaten=(int(Globals.SCREEN_WIDTH / 2), 100))
+        curPtank = self.players[self.current_player].tank
+        curPtank.tank_graphics.draw(win, int(Globals.SCREEN_WIDTH / 2) + 125, 100, 
+                                                                  Tank.calculateTurretEndPos(int(Globals.SCREEN_WIDTH / 2) + 125, 100, 
+                                                                                             curPtank.turretAngle))
+
+        self.resumePlaying.draw(win)
+        self.switchWeaponType.draw(win)
+        for button in self.weapons_buttons[self.curr_weapon_type]:
+            button.draw(win)
+
         
         

@@ -1,17 +1,24 @@
 from core_objects import Tank
 from menubar import MenuBar
 from fpsConstants import Globals
+from weapons import Weapon
 
 import random
 import pygame
 class Player:
-    def __init__(self, name, color, tank : Tank) -> None:
-        self.tank : Tank = tank
+    def __init__(self, name, color, weapons) -> None:
         self.fired = False
-
+        self.name = name
+        self.color = color
+        self.weapons : list[Weapon] = weapons
+        self.tank : Tank = None
 
     def begin_turn(self):
         self.fired = False
+
+    def create_tank(self, x, y) -> Tank:
+        self.tank = Tank(x, y, self.color, self.weapons)
+        return self.tank 
 
 
     def gameloop_iteration(self, keys_pressed, mouse_position) -> bool:
@@ -36,8 +43,8 @@ class Player:
 
 class HumanPlayer(Player):
 
-    def __init__(self, name, color, tank) -> None:
-        super().__init__(name, color, tank)
+    def __init__(self, name, color, weapons) -> None:
+        super().__init__(name, color, weapons)
         self.menuBar = MenuBar()
 
 
@@ -106,8 +113,8 @@ class RandomPlayer(Player):
     MIN_ACTION_DURATION = [5, 5, 5, 5, 1, 1, 1]
     MAX_ACTION_DURATION = [25, 25, 15, 15, 5, 5, 10]
 
-    def __init__(self, name, color, tank) -> None:
-        super().__init__(name, color, tank)
+    def __init__(self, name, color, weapons) -> None:
+        super().__init__(name, color, weapons)
 
         self.current_action = RandomPlayer.NO_ACTION
         self.action_duration = 10

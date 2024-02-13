@@ -133,11 +133,15 @@ class Terrain(GameObject):
                 line(window, self.terrain_color, (x, beginY), (x, endY), 1)
 
 class Sun(GameObject):
-    """
-    Sun-object is completely decorational in the background. If you set the sun to move by calling Sun.move() after initialization
-    the sun moves itself by Sun.angleSpeed each iteration.
-    """
-    def __init__(self):
+
+
+    NORMAL_MOVING_SPEED = (math.pi / 24) * Globals.FPS.dt
+    def __init__(self, angleSpeed : float = 0):
+        """
+        Sun-object is completely decorational in the background. If you set the sun to move by calling Sun.move() after initialization
+        the sun moves itself by Sun.angleSpeed each iteration.
+        @param angleSpeed describes the speed of the angle when it moves.
+        """
         super().__init__(x = int(Globals.SCREEN_WIDTH*8/10), y = int(Globals.SCREEN_HEIGHT*3/10))
 
         self.screenHeight = Globals.SCREEN_HEIGHT
@@ -146,7 +150,7 @@ class Sun(GameObject):
         self.sunColor = (252,208,70)
         self.sunRadius = 50
 
-        self.angleSpeed = 0
+        self.angleSpeed = angleSpeed
         self.movementRadius = int(Globals.SCREEN_WIDTH * 3 / 5)
         self.angle = math.pi / 4
 

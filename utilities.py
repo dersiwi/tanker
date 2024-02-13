@@ -51,6 +51,7 @@ class Colors:
     grey = (110,110,110)
     forest_green = (34,139,34)
     skyblue = (176,226,255)
+    yellow = (255, 255, 0)
 
     playerPurple = (127, 0, 255)
     playerTourquise = (0, 153, 153)

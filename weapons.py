@@ -5,7 +5,7 @@ from pygame.draw import circle, rect
 from pygame.mouse import get_pos
 from fpsConstants import Globals
 from utilities import Colors, DegreeCnvt
-from explosions import Explosion
+from explosions import Explosion, AdvancedExplosion
 
 import math
 import random
@@ -221,6 +221,7 @@ class Weapon:
     TYPE_0 = 0
     TYPE_1 = 1
     TYPE_2 = 2
+    TYPES : list[int]= [TYPE_0, TYPE_1, TYPE_2]
     def __init__(self, name, weapon_id, w_type, amount):
         self.name = name
         self.weapon_id = weapon_id
@@ -316,7 +317,7 @@ class WeaponsManager:
         with open(path, "r") as file:
             data = json.load(file)
 
-        self.weapons : dict[str, list[Weapon]] = {Weapon.TYPE_0 : [],
+        self.weapons : dict[int, list[Weapon]] = {Weapon.TYPE_0 : [],
                                                   Weapon.TYPE_1 : [],
                                                   Weapon.TYPE_2 : []}
     

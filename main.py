@@ -24,50 +24,47 @@ pygame.display.set_caption("Tanker")
 
 
 
-def create_tanks(player_types):
+def create_players(player_types):
     player = []
-    playerTanks = []
-    colors = Colors.playerColors
-    colorCounter = 0
+
     for x, ptype in enumerate(player_types):
 
-        randomX = random.randint(0, 740)
-        T = Tank(randomX,100, colors[colorCounter], initial_weapons=WeaponsManager.get_instance().get_initial_weapons())
-
         if ptype == PlayerSelector.PlayerType.HUMAN:
-            p = HumanPlayer(name=x, color=colors[colorCounter], tank=T)
+            p = HumanPlayer(name=x, 
+                            color=Colors.playerColors[x % len(Colors.playerColors)], 
+                            weapons =  WeaponsManager.get_instance().get_initial_weapons())
         elif ptype == PlayerSelector.PlayerType.RANDOM:
-            p = RandomPlayer(name=x, color=colors[colorCounter], tank=T)
+            p = RandomPlayer(name=x, 
+                             color=Colors.playerColors[x % len(Colors.playerColors)], 
+                             weapons =  WeaponsManager.get_instance().get_initial_weapons())
+            
         elif ptype == PlayerSelector.PlayerType.AI:
             raise NotImplementedError("Ai not implemented yet")
-
-
+        
+        p.create_tank(x = random.randint(0, Globals.SCREEN_WIDTH), y = 200)
         player.append(p)
-        playerTanks.append(T)
 
-        colorCounter+=1
-        if colorCounter ==len(colors):
-            colorCounter = 0
-    return player, playerTanks
+    return player
 
 def main():
     startingMenu = StartMenu(screenWidth=w_width, screenHeight=w_height)
     startingMenu.runMenu(win)
 
     #gameInitialisation
-        
+    players : list[Player] = create_players(startingMenu.player_selector.get_player_types())
+    
     
     #gameplay
     while True:
         GameObjectHandler.destroy_instance()
-        player, playerTanks = create_tanks(startingMenu.player_selector.get_player_types())
-        game = Game(window=win, players=player, terrain_id=startingMenu.terrain_selector.terrainTypeSelected)
+        game = Game(window=win, players=players, terrain_id=startingMenu.terrain_selector.terrainTypeSelected)
         game.gameLoop()
-
-        #gameShop = GameShop(w_width, w_height)
-        #gameShop.runGameShop(win)
-
-        #for tank in playerTanks:
-        #    tank.tLp = .LTankInitValuesP
+        
+        gameshop = GameShop(players)
+        gameshop.runGameShop(win)
+        for player in players:
+            player.create_tank(x = random.randint(0, Globals.SCREEN_WIDTH), y = 200)
+        
+        
 
 main()

@@ -20,6 +20,28 @@ class Explosion(GameObject):
         circle(win, Colors.orange, (self.x, self.y), int(self.radius/2))
 
 
+class AdvancedExplosion(GameObject):
+    def __init__(self, x, y, radius, damage):
+        self.colors = [Colors.yellow, Colors.orange, Colors.red, Colors.black]
+        super().__init__(x=x, y=y, has_duration=True, duration=len(self.colors) * 10)
+        self.radius = radius
+        self.damage = damage
+        self.timer = 0
+
+
+    def get_data(self) -> ExplosionData:
+        return ExplosionData(self.x, self.y, self.radius, self.damage)
+    
+    def update(self):
+        self.timer += 1
+        self.timer = (self.timer + 1) % len(self.colors)
+
+
+    def draw(self, win):            
+        #circle(win, Colors.red, (self.x, self.y), self.radius)
+        #circle(win, Colors.orange, (self.x, self.y), int(self.radius/2))
+        circle(win, self.colors[self.timer], (self.x, self.y), int(self.radius/2))
+
 
 
 class MushroomCloud(GameObject):
