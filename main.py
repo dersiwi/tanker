@@ -1,5 +1,6 @@
 import pygame
 import random
+import sys
 #from tankClass import Tank
 #from terrainClass import terrain
 from core_objects import Tank
@@ -11,6 +12,12 @@ from player import Player, HumanPlayer, RandomPlayer
 from fpsConstants import Globals
 from weapons import WeaponsManager
 from gameobject import GameObjectHandler
+
+#this is just for development to test if the shop works
+goto_shop = False
+if len(sys.argv) > 1 and sys.argv[1] == "shop":
+    goto_shop = True
+
 pygame.init()
 pygame.font.init()
 
@@ -56,15 +63,14 @@ def main():
     
     #gameplay
     while True:
-        GameObjectHandler.destroy_instance()
-        game = Game(window=win, players=players, terrain_id=startingMenu.terrain_selector.terrainTypeSelected)
-        game.gameLoop()
+        if not goto_shop:
+            GameObjectHandler.destroy_instance()
+            game = Game(window=win, players=players, terrain_id=startingMenu.terrain_selector.terrainTypeSelected)
+            game.gameLoop()
         
         gameshop = GameShop(players)
         gameshop.runGameShop(win)
         for player in players:
             player.create_tank(x = random.randint(0, Globals.SCREEN_WIDTH), y = 200)
-        
-        
 
 main()

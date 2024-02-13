@@ -6,6 +6,7 @@ from pygame.mouse import get_pos
 from fpsConstants import Globals
 from utilities import Colors, DegreeCnvt
 from explosions import Explosion, AdvancedExplosion
+from core_object_utilities import TankGlobals
 
 import math
 import random
@@ -31,7 +32,6 @@ class Weapon_Executor:
     def draw(self, win):
         raise NotImplementedError("Do not use this class directly, initialize sublcass and implement it there.")
     
-
 class Projectile(GameObject, Weapon_Executor):
 
     def calculate_xy_speed(angle : float, v0 : float) -> tuple[float, float]:
@@ -86,7 +86,6 @@ class Projectile(GameObject, Weapon_Executor):
         if not self.hasCollided:
             circle(window, self.projectileColor, (self.x, self.y), 1)   #pygame function, see import
 
-
 class VulcanoBomb(Projectile):
 
     def __init__(self, x, y, xSpeed, ySpeed, weapon):
@@ -102,9 +101,6 @@ class VulcanoBomb(Projectile):
         """
         return self.hasCollided
     
-    def get_bounding_box(self) -> tuple[int, int, int, int]:
-        return GameObject.BoundingBox.create_bounding_box(self.x, self.y, 1, 1)
-    
     def collision(self, gameobject) -> bool:
         print("Vulcano-bomb collided with : %s"%gameobject)
         self._finish_projectile()
@@ -113,6 +109,27 @@ class VulcanoBomb(Projectile):
             p = Projectile(self.x, self.y - i * 5, xSpeed, ySpeed, weapon = WeaponsManager.get_instance().get_weapon_by_id(weaponid = 0)) 
             GameObjectHandler.get_instance().add_gameobject(p)
  
+class TeleportationGranade(Projectile):
+    def __init__(self, x, y, xSpeed, ySpeed, weapon, tank):
+        super().__init__(x, y, xSpeed, ySpeed, weapon)
+        self.weapon : TypeThreeWeapon = weapon
+        self.hasCollided = False
+        self.tank = tank
+
+    def projectile_iteration(self, pos) -> bool:
+        """
+        @return True, if projectile iteration is done. False If there are still iterations to coem
+        """
+        return self.hasCollided
+    
+    def collision(self, gameobject) -> bool:
+        print("Teleportation collided with : %s"%gameobject)
+        self.tank.x = self.x - int(TankGlobals.WIDTH / 2)
+        self.tank.y = self.y - TankGlobals.HEIGHT - 5
+        self.tank.ySpeed = 0
+        self.tank.xSpeed = 0
+        self._finish_projectile()
+
 class Airstrike(Weapon_Executor, GameObject):
     PLANNING_STAGE = 0
     EXECUTING_STAGE = 1
@@ -217,16 +234,20 @@ class Airstrike(Weapon_Executor, GameObject):
             circle(win, Colors.red, get_pos(), radius=5)
 
 
+#----------------------weapons and weapon-classes 
+
 class Weapon:
     TYPE_0 = 0
     TYPE_1 = 1
     TYPE_2 = 2
-    TYPES : list[int]= [TYPE_0, TYPE_1, TYPE_2]
-    def __init__(self, name, weapon_id, w_type, amount):
-        self.name = name
-        self.weapon_id = weapon_id
-        self.amount = amount
-        self.w_type = w_type
+    TYPE_3 = 3
+    TYPES : list[int]= [TYPE_0, TYPE_1, TYPE_2, TYPE_3]
+    def __init__(self, w_dict):
+        self.w_dict = w_dict
+        self.name = w_dict["name"]
+        self.weapon_id = w_dict["weapon_id"]
+        self.amount = w_dict["initial_amount"]
+        self.w_type = w_dict["weapon_type"]
 
     def get_copy(self):
         pass
@@ -237,46 +258,43 @@ class Weapon:
     def hasAmmoLeft(self):
         return self.amount >= 1
     
-    def get_weapons_executor(self, tpos : tuple[int, int] = (-1, -1), tendpos : tuple[int, int] = (-1, -1), tankv0 : float = 0, tankAngle : float = 0) -> Weapon_Executor:
+    def get_weapons_executor(self, tank) -> Weapon_Executor:
         """
-        @param x,y cordinate of tank, v0 of tank and the current turret-angle
+        @param tank - Tank object from which this weapon was fired 
         @return an instance of WeaponExecutor
         """
         pass
 
 class TypeZeroWeapon(Weapon):
-    def __init__(self, name, weapon_id, w_type, damage, amount, explosion_radius):
-        super().__init__(name, weapon_id, w_type, amount)
-        self.damage = damage
-        self.explosion_radius = explosion_radius
+    def __init__(self, w_dict):
+        super().__init__(w_dict)
+        self.damage = w_dict["damage"]
+        self.explosion_radius = w_dict["explosion_radius"]
 
     def get_copy(self):
-        return TypeZeroWeapon(self.name, self.weapon_id, self.w_type, self.damage, self.amount, self.explosion_radius)
+        return TypeZeroWeapon(self.w_dict)
 
-    def get_weapons_executor(self, tpos : tuple[int, int] = (-1, -1), 
-                             tendpos : tuple[int, int] = (-1, -1), 
-                             tankv0 : float = 0, 
-                             tankAngle : float = 0) -> Weapon_Executor:
+    def get_weapons_executor(self, tank) -> Weapon_Executor:
         """
         @param x,y cordinate of tank, v0 of tank and the current turret-angle
         @return an instance of WeaponExecutor
         """
-        vX, vY = Projectile.calculate_xy_speed(tankAngle, tankv0)
-        print("Projectile : %s, %s, %s, %s, tpos = %s, %s"%(tendpos[0], tendpos[1], vX, vY, tpos[0], tpos[1]))
+        tendpos = tank.get_turret_end_pos()
+        vX, vY = Projectile.calculate_xy_speed(tank.turretAngle, tank.v0)
         return Projectile(tendpos[0], tendpos[1], vX, vY, self)
 
 class TypeOneWeapon(Weapon):
-    def __init__(self, name, weapon_id, w_type, amount, accuracy, weaponweapon_id_to_drop, n_drops, cooldown):
-        super().__init__(name, weapon_id, w_type, amount)
-        self.accuracy = accuracy
-        self.weaponweapon_id_to_drop = weaponweapon_id_to_drop
-        self.n_drops = n_drops
-        self.cooldown = cooldown
+    def __init__(self, w_dict):
+        super().__init__(w_dict)
+        self.accuracy = w_dict["accuracy"]
+        self.weaponweapon_id_to_drop = w_dict["weapon_id_to_drop"]
+        self.n_drops = w_dict["n_drops"]
+        self.cooldown = w_dict["cooldown"]
 
     def get_copy(self):
         return TypeOneWeapon(self.name, self.weapon_id, self.w_type, self.amount, self.accuracy, self.weaponweapon_id_to_drop, self.n_drops, self.cooldown)
     
-    def get_weapons_executor(self, tpos : tuple[int, int] = (-1, -1), tendpos : tuple[int, int] = (-1, -1), tankv0 : float = 0, tankAngle : float = 0) -> Weapon_Executor:
+    def get_weapons_executor(self, tank) -> Weapon_Executor:
         """
         @param x,y cordinate of tank, v0 of tank and the current turret-angle
         @return an instance of WeaponExecutor
@@ -285,23 +303,40 @@ class TypeOneWeapon(Weapon):
 
 
 class TypeTwoWeapon(Weapon):
-    def __init__(self, name, weapon_id, w_type, amount, n_cluster_projectiles, v0, cluster_weapon_id):
-        super().__init__(name, weapon_id, w_type, amount)
-        self.n_cluster_projectiles = n_cluster_projectiles
-        self.v0 = v0
-        self.cluster_weapon_id = cluster_weapon_id
+    def __init__(self, w_dict):
+        super().__init__(w_dict)
+        self.n_cluster_projectiles = w_dict["n_cluster_projectiles"]
+        self.v0 = w_dict["v0"]
+        self.cluster_weapon_id = w_dict["cluster_weapon_id"]
 
     def get_copy(self):
-        return TypeTwoWeapon(self.name, self.weapon_id, self.w_type, self.amount, self.n_cluster_projectiles, self.v0, self.cluster_weapon_id)
+        return TypeTwoWeapon(self.w_dict)
     
-    def get_weapons_executor(self, tpos : tuple[int, int] = (-1, -1), tendpos : tuple[int, int] = (-1, -1), tankv0 : float = 0, tankAngle : float = 0) -> Weapon_Executor:
+    def get_weapons_executor(self, tank) -> Weapon_Executor:
         """
         @param x,y cordinate of tank, v0 of tank and the current turret-angle
         @return an instance of WeaponExecutor
         """
-        vX, vY = Projectile.calculate_xy_speed(tankAngle, tankv0)
+        tendpos = tank.get_turret_end_pos()
+        vX, vY = Projectile.calculate_xy_speed(tank.turretAngle, tank.v0)
         return VulcanoBomb(tendpos[0], tendpos[1], vX, vY, self)
     
+class TypeThreeWeapon(Weapon):
+    def __init__(self, w_dict):
+        super().__init__(w_dict)
+        self.tank = None
+
+    def get_copy(self):
+        return TypeThreeWeapon(self.w_dict)
+    
+    def get_weapons_executor(self, tank) -> Weapon_Executor:
+        self.tank = tank
+        tendpos = tank.get_turret_end_pos()
+        vX, vY = Projectile.calculate_xy_speed(tank.turretAngle, tank.v0)
+        return TeleportationGranade(tendpos[0], tendpos[1], vX, vY, self, tank)
+
+
+#-----------------------------weapons manager
 
 class WeaponsManager:
 
@@ -317,36 +352,19 @@ class WeaponsManager:
         with open(path, "r") as file:
             data = json.load(file)
 
-        self.weapons : dict[int, list[Weapon]] = {Weapon.TYPE_0 : [],
-                                                  Weapon.TYPE_1 : [],
-                                                  Weapon.TYPE_2 : []}
-    
-        for typezero in data[str(Weapon.TYPE_0)]:
-            self.weapons[Weapon.TYPE_0].append(TypeZeroWeapon(name = typezero["name"],
-                                                        weapon_id = typezero["weapon_id"],
-                                                        w_type = typezero["weapon_type"],
-                                                       damage = typezero["damage"],
-                                                       amount = typezero["initial_amount"],
-                                                       explosion_radius = typezero["explosion_radius"]))
-        for typezero in data[str(Weapon.TYPE_1)]:
-            self.weapons[Weapon.TYPE_1].append(TypeOneWeapon(name = typezero["name"],
-                                            amount = typezero["initial_amount"],
-                                            weapon_id = typezero["weapon_id"],
-                                            w_type = typezero["weapon_type"],
-                                            accuracy=typezero["accuracy"],
-                                            weaponweapon_id_to_drop=typezero["weapon_id_to_drop"],
-                                            n_drops=typezero["n_drops"],
-                                            cooldown=typezero["cooldown"]))
-
-        for typetwo in data[str(Weapon.TYPE_2)]:
-            self.weapons[Weapon.TYPE_2].append(TypeTwoWeapon(name = typetwo["name"],
-                                            amount = typetwo["initial_amount"],
-                                            weapon_id = typetwo["weapon_id"],
-                                            w_type = typetwo["weapon_type"],
-                                            n_cluster_projectiles=typetwo["n_cluster_projectiles"],
-                                            v0 = typetwo["v0"],
-                                            cluster_weapon_id=typetwo["cluster_weapon_id"]))
-            
+        self.weapons : dict[int, list[Weapon]] = {}
+        for w_type in Weapon.TYPES:
+            self.weapons[w_type] = []
+            for weapondict in data[str(w_type)]:
+                if w_type == Weapon.TYPE_0:
+                    self.weapons[Weapon.TYPE_0].append(TypeZeroWeapon(weapondict))
+                elif w_type == Weapon.TYPE_1:
+                    self.weapons[Weapon.TYPE_1].append(TypeOneWeapon(weapondict))
+                elif w_type == Weapon.TYPE_2:
+                    self.weapons[Weapon.TYPE_2].append(TypeTwoWeapon(weapondict))
+                elif w_type == Weapon.TYPE_3:
+                    self.weapons[Weapon.TYPE_3].append(TypeThreeWeapon(weapondict))
+                
     def get_initial_weapons(self) -> list[Weapon]:
         init_weapons = []
         for w_type in self.weapons:

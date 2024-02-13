@@ -275,7 +275,7 @@ class Tank(GameObject):
         self.tank_graphics.draw(window, self.x, self.y, self.get_turret_end_pos())
 
     def get_weapon_executor(self) -> Weapon_Executor:
-        return self.weapons[self.currentWeapon].get_weapons_executor((self.x, self.y), self.get_turret_end_pos(), self.v0, self.turretAngle)
+        return self.weapons[self.currentWeapon].get_weapons_executor(self)
 
 class Shield(GameObject):
 

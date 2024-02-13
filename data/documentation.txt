@@ -23,3 +23,12 @@ Weapons
             "accuracy" : Determines how accurate the bombs are being dropped on target
             "weapon_id_to_drop" : an ID of a type 0 weapon that will be dropped by the airplane
             "n_drops" : the amount of weapons that will be dropped by the airplane
+
+        type 2 - Vulcano bombs
+
+    How to add a weapon-class
+
+        1. Add the weapon class to the weapons.json
+        2. Add variable Weapon.TYPE_N = N and add it to the Weapon.TYPES-List
+        3. Implement class TypeNWeapon and a Weapon_Executor
+        4. Add TYPE_N-Clause to elif-statements in WeaponManager.init()
