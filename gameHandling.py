@@ -142,7 +142,7 @@ class Game:
     
 
     def display_help_menu(self):
-        helpstrings = ["Move left      : <", "Move right     : >", "Turret right   : up", "Turret down    : down", "deploy shield  : s", "fire           : space"]
+        helpstrings = ["Move left      : <", "Move right     : >", "Turret right   : up", "Turret down    : down",  "fire           : space", "deploy mine  : m",]
         for i, helpstring in enumerate(helpstrings):
             message_to_screen(self.window, msg=helpstring, color=Colors.black, fontSize=25, fontKoordinaten=(300, 200 + i * 25))
 

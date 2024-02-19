@@ -292,7 +292,7 @@ class TypeOneWeapon(Weapon):
         self.cooldown = w_dict["cooldown"]
 
     def get_copy(self):
-        return TypeOneWeapon(self.name, self.weapon_id, self.w_type, self.amount, self.accuracy, self.weaponweapon_id_to_drop, self.n_drops, self.cooldown)
+        return TypeOneWeapon(self.w_dict)
     
     def get_weapons_executor(self, tank) -> Weapon_Executor:
         """

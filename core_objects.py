@@ -51,9 +51,17 @@ class Terrain(GameObject):
         for (line_max, line_min) in self.height[collision_x]:
             if line_max > lowest_y and line_min <= lowest_y and type(gameobject) == Tank:
                 gameobject.y = line_min - bb[GameObject.BoundingBox.HEIGHT]
+                falldamage = self.__calculate_falldamage(gameobject.ySpeed)
+                #gameobject.tLp -= self.__calculate_falldamage()                
 
         gameobject.ySpeed = 0
 
+    def __calculate_falldamage(self, ySpeed):
+        #find out maximal possible ySpeed - then interpolate between min_ySpeed to get damage and a value for maximal falldamage
+        falldamage = abs(int(5 / 4000 * ySpeed**2))
+        if ySpeed >10:
+            print("Gameobject y-Speed : %i, resulting falldamage : %i"%(ySpeed, falldamage))
+        return falldamage
     
     def collision_detecetion(self, gameobject: GameObject):
         """If an object collides with the terrain, the terrain sets its ySpeed to zero 
@@ -353,8 +361,8 @@ class Mines(GameObject):
         
     def __exploide_mine(self):
         GameObjectHandler.get_instance().add_gameobject(self.explosion_)
-        GameObjectHandler.get_instance().explosion(self.explosion_.get_data())
         GameObjectHandler.get_instance().remove_gameobject(self)
+        GameObjectHandler.get_instance().explosion(self.explosion_.get_data())
 
     def explosion(self, expl: ExplosionData):
         if expl.is_in_radius(self.x, self.y):

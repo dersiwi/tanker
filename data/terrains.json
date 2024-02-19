@@ -22,5 +22,11 @@
         "name" : "desert-exponential",
         "height-functions" : ["10+2**(x / 100)"],
         "intervals" : [[0,900]]
+    },
+    "4" : {
+        "rgb-color-value" : [0, 153, 0],
+        "name" : "woods-flat",
+        "height-functions" : ["170"],
+        "intervals" : [[0,900]]
     }
 }
