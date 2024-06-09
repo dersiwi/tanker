@@ -14,8 +14,8 @@ there were so many bugs it took more time to scroll through the file than to jus
 As of today the code is structured to the point where i feel comfortable in expanding and improving the project.
 
 ## Gameplay
-The game is round based. Meaning only one player can do actions at a time. A players turn ends as soon as he fires and the projectile either 
-leaves the canvas or hits something. 
+The game is round based. Meaning only one player can take actions at a time. A players turn ends as soon as he fires and the projectile either 
+leaves the canvas or hits something.
 
 <p align="center">
     <img width="600" src="https://github.com/dersiwi/tanker/blob/main/images/gameDemo-23112022-2.png" alt="Gameplay Screenshot, 23.11.2022">
@@ -24,38 +24,44 @@ leaves the canvas or hits something.
 </p>
 
 ### How to play
-#### Check prerequisites
-As of 23.11.2022, there is no executable version of the game. So you have to start the game either via commandline or by clicking on it.
-First of all, make sure you have python installed;
+1. Choose terrain (no selected terrain -> random terrain)
+2. Choose amont (default 2) and type of player (default human)
+3. Click Play
 
-```
-/yourfolder$ python3 --version
-Python 3.10.6
-/yourfolder$ 
-```
-or 
-```
-/yourfolder$ python --verison
-Python 3.10.6
-/yourfolder$ 
-```
-Now, check if have pygame installed;
-```
-/yourfolder$ python3
-Python 3.10.6 (main, Nov  2 2022, 18:53:38) [GCC 11.3.0] on linux
-Type "help", "copyright", "credits" or "license" for more information.
->>> import pygame
-pygame 2.1.2 (SDL 2.0.16, Python 3.10.6)
-Hello from the pygame community. https://www.pygame.org/contribute.html
->>> 
+#### Controls 
+Functions like `change_weapon` and adjusting the force can only be done via the GUI. `fire` is possible both by pressing `space` or the red fire button in the GUI.
 
-```
-If your responses resemble the ones above, you are ready to go. As you can see the code snippets above 
-are made in a linux console, they should however look the same in a windwos console.
+For all other controls click `h` while in game to get the latest documentation.
 
-#### Start playing
-After you pulled the repository in a directory, either double click main.py or execute 
+
+### Start the game
+Clone the repository and execute `main.py`. Should work like this (exemplary on a bash-console):
+```sh
+~/somefolder$ git pull https://github.com/dersiwi/tanker.git
+~/somefolder$ cd tanker
+~/somefolder/tanker$ python3 main.py
 ```
-yourfolder$ python3 main.py
-```
-and the game should start.
+and the game should start. Pygame and any other missing packages can be installed using `pip install [package_name]`.
+
+## Further development
+
+### Player types
+As of 08.06. the only working player-types are `human` and `random`. What i want to add in the future is a more intelligent player type that actually is a valid bot to play against.
+
+### Rewarwd system and shop
+Although a shop exists in which a player can select his weapons for the new round i want to intrododuce a system in which a player gets points based on how much damage he dealt. The player can then use these points to buy items in the shop.
+
+The shop (currenlty) only contains only things that the player can fire. I want to add shields and mines to the shop as well.
+
+
+### Levels
+
+I think a single-player campain would be a great addition to the game. This is less of a development project but rather just content creation.
+
+#### Infinity-Level
+A level where the map expands infinitely to the right and the player has to get as far as possible.
+
+### Buildings
+Either as leve-objects or just design objects in a terrain buildings like bunkers that can also shoot could be fun.
+
+
