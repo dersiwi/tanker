@@ -1,5 +1,5 @@
 from gameobject import GameObject, GameObjectHandler
-from utilities import DegreeCnvt, ExplosionData, Colors
+from utilities import DegreeCnvt, ExplosionData, Colors, ConsolePrinter
 from weapons import Weapon, Weapon_Executor
 from fpsConstants import Globals
 from core_object_utilities import TerrainType, TankGlobals, TankGraphics
@@ -60,7 +60,7 @@ class Terrain(GameObject):
         #find out maximal possible ySpeed - then interpolate between min_ySpeed to get damage and a value for maximal falldamage
         falldamage = abs(int(5 / 4000 * ySpeed**2))
         if ySpeed >10:
-            print("Gameobject y-Speed : %i, resulting falldamage : %i"%(ySpeed, falldamage))
+            ConsolePrinter.print("Gameobject y-Speed : %i, resulting falldamage : %i"%(ySpeed, falldamage), print_level=ConsolePrinter.REGULAR)
         return falldamage
     
     def collision_detecetion(self, gameobject: GameObject):
@@ -304,7 +304,7 @@ class Shield(GameObject):
     
     def explosion(self, expl : ExplosionData):
         if abs(expl.x - self.x) <= self.radius + Shield.TOLERANCE and abs(expl.y - self.y) <= self.radius + Shield.TOLERANCE:
-            print("shield health : %s"%self.health)
+            ConsolePrinter.print("shield health : %s"%self.health, print_level=ConsolePrinter.REGULAR)
             self.health -= expl.damage
         
         if self.health <= 0:

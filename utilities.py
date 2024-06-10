@@ -37,6 +37,52 @@ class ExplosionData:
         return x <= self.x + self.radius and x >= self.x - self.radius and \
                 y <= self.y + self.radius and y >= self.y - self.radius
     
+class ConsolePrinter:
+
+    class bcolors:
+        #https://stackoverflow.com/questions/287871/how-do-i-print-colored-text-to-the-terminal
+        HEADER = '\033[95m'
+        OKBLUE = '\033[94m'
+        OKCYAN = '\033[96m'
+        OKGREEN = '\033[92m'
+        WARNING = '\033[93m'
+        FAIL = '\033[91m'
+        ENDC = '\033[0m'
+        BOLD = '\033[1m'
+        UNDERLINE = '\033[4m'
+
+    
+    NOTHING = -1
+    ALL = 3
+    DEBUG = 0
+    REGULAR = 1
+    VERBOSE = 2
+    LEVELS = [DEBUG, REGULAR, VERBOSE]
+    LEVEL_PREMESSAGE = ["[DEBUG] : ", "[REGULAR] : ", "[VERBOSE] : "]
+    LEVEL_COLORS = [bcolors.WARNING, bcolors.OKBLUE, bcolors.BOLD]
+    PRINT_LEVEL = NOTHING
+
+    @staticmethod
+    def print(message : str, print_level : int = DEBUG) -> None:
+        """
+        Prints messages to the console. Depeding on the print_level with different colors and pre-messages
+        @param message : str to print
+        @param print_level, one of NOTHING, DEBUG, REGULAR, VERBOSE. Defaults to DEBUG
+        """
+        if print_level == ConsolePrinter.NOTHING:
+            return
+        elif print_level == ConsolePrinter.PRINT_LEVEL or ConsolePrinter.PRINT_LEVEL == ConsolePrinter.ALL:
+            ConsolePrinter.print_color(ConsolePrinter.LEVEL_PREMESSAGE[print_level] + message, 
+                                       color = ConsolePrinter.LEVEL_COLORS[print_level])
+            return
+        if not print_level in ConsolePrinter.LEVELS:
+            ConsolePrinter.print_color("[UNKNOWN-PRINT-LEVEL] : " + message, color = ConsolePrinter.bcolors.FAIL)
+
+    @staticmethod
+    def print_color(message : str, color = bcolors.ENDC) -> None:
+        print(color + message + ConsolePrinter.bcolors.ENDC)
+            
+    
 
 class Colors:
     #colors

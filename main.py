@@ -1,22 +1,39 @@
-import pygame
 import random
 import sys
-#from tankClass import Tank
-#from terrainClass import terrain
-from core_objects import Tank
+import argparse
+import pygame
+
+
 from gameHandling import Game
 from startmenu import StartMenu, PlayerSelector
 from shop import GameShop
-from utilities import Colors
+from utilities import Colors, ConsolePrinter
 from player import Player, HumanPlayer, RandomPlayer
 from fpsConstants import Globals
 from weapons import WeaponsManager
 from gameobject import GameObjectHandler
 
-#this is just for development to test if the shop works
-goto_shop = False
-if len(sys.argv) > 1 and sys.argv[1] == "shop":
-    goto_shop = True
+
+#define args and argparser
+parser = argparse.ArgumentParser(
+    prog="tanker",
+    description="2d tank game"
+)
+parser.add_argument("-c", "--console_level", type=int, default=ConsolePrinter.NOTHING,
+                    help="Defines console messages to be displayed. 0 (debug), 1(regular), 2(verbose).")
+parser.add_argument("-s", "--shop", action="store_true", default=False, help="If typed, the program jumpts to the store without starting the game.")
+parser.add_argument("-t", "--throw", action="store_true", help="If called with this flag, an exception in the main method is thrown.")
+args = parser.parse_args()
+
+
+goto_shop = args.shop
+throw_exception_in_main = args.throw
+ConsolePrinter.PRINT_LEVEL = args.console_level
+ConsolePrinter.print("Console printer level : %i, gotoshop : %s"%(ConsolePrinter.PRINT_LEVEL, goto_shop), 
+                     print_level=ConsolePrinter.DEBUG)
+
+
+
 
 pygame.init()
 pygame.font.init()
@@ -73,4 +90,10 @@ def main():
         for player in players:
             player.create_tank(x = random.randint(0, Globals.SCREEN_WIDTH), y = 200)
 
-main()
+try:
+    main()
+except Exception as e:
+    ConsolePrinter.print("Exception in main method", print_level=ConsolePrinter.DEBUG)
+    ConsolePrinter.print(str(e.args), print_level=ConsolePrinter.DEBUG)
+    if throw_exception_in_main:
+        raise e

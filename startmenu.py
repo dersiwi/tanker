@@ -294,7 +294,6 @@ class StartMenu:
                     self.gotoGame = False
                     continue
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    #print(pygame.mouse.get_pos())
                     self.checkMouseClick(pygame.mouse.get_pos())
 
             win.fill(Colors.white)

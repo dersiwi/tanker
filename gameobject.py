@@ -1,5 +1,5 @@
 from fpsConstants import Globals
-from utilities import ExplosionData
+from utilities import ExplosionData, ConsolePrinter
 
 
 
@@ -148,8 +148,9 @@ class GameObjectHandler:
             self.collision_classes[gameobject.collision_class].remove(gameobject)
             self.gameObjects.remove(gameobject)
         except Exception as e:
-            print(gameobject)
-            print(e.args)
+            ConsolePrinter.print("Exception trying to remove gameobject in GameObjectHandler.remove_gameobject(...)", print_level=ConsolePrinter.DEBUG)
+            ConsolePrinter.print(str(gameobject), print_level=ConsolePrinter.DEBUG)
+            ConsolePrinter.print(str(e.args), print_level=ConsolePrinter.DEBUG)
 
 
 

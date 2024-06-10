@@ -1,5 +1,5 @@
 
-from utilities import Colors, TextButton, message_to_screen
+from utilities import Colors, TextButton, message_to_screen, ConsolePrinter
 from weapons import Weapon, WeaponsManager
 from fpsConstants import Globals
 import pygame
@@ -60,7 +60,8 @@ class GameShop:
             self.curr_weapon_type = (self.curr_weapon_type + 1) % len(Weapon.TYPES)
         for idx, weapon_button in enumerate(self.weapons_buttons[self.curr_weapon_type]):
             if weapon_button.isClicked(pos):
-                print("Player %s bought %s - pricing not implemeneted yet"%(self.players[self.current_player].name, weapon_button.text))
+                ConsolePrinter.print("Player %s bought %s - pricing not implemeneted yet"%(self.players[self.current_player].name, weapon_button.text), 
+                                     print_level=ConsolePrinter.VERBOSE)
                 self.__add_weapon_to_player(WeaponsManager.get_instance().weapons[self.curr_weapon_type][idx].get_copy())
 
     def __add_weapon_to_player(self, weapon : Weapon):
@@ -81,7 +82,6 @@ class GameShop:
                     gotoGame = False
                     continue
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    #print(pygame.mouse.get_pos())
                     self.checkMouseClick(pygame.mouse.get_pos())
             win.fill(Colors.white)
             self.draw(win)

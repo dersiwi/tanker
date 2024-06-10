@@ -24,6 +24,7 @@ leaves the canvas or hits something.
 </p>
 
 ### How to play
+0. Start `main.py`
 1. Choose terrain (no selected terrain -> random terrain)
 2. Choose amont (default 2) and type of player (default human)
 3. Click Play
@@ -31,7 +32,7 @@ leaves the canvas or hits something.
 #### Controls 
 Functions like `change_weapon` and adjusting the force can only be done via the GUI. `fire` is possible both by pressing `space` or the red fire button in the GUI.
 
-For all other controls click `h` while in game to get the latest documentation.
+For all other controls press `h` while in game to get the latest documentation.
 
 
 ### Start the game
@@ -42,6 +43,8 @@ Clone the repository and execute `main.py`. Should work like this (exemplary on 
 ~/somefolder/tanker$ python3 main.py
 ```
 and the game should start. Pygame and any other missing packages can be installed using `pip install [package_name]`.
+
+To see start-options call `$ python3 main.py --help`.
 
 ## Further development
 

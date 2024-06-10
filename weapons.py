@@ -4,7 +4,7 @@ from gameobject import GameObject, GameObjectHandler
 from pygame.draw import circle, rect
 from pygame.mouse import get_pos
 from fpsConstants import Globals
-from utilities import Colors, DegreeCnvt
+from utilities import Colors, DegreeCnvt, ConsolePrinter
 from explosions import Explosion, AdvancedExplosion
 from core_object_utilities import TankGlobals
 
@@ -49,7 +49,7 @@ class Projectile(GameObject, Weapon_Executor):
 
         vY = v0 * math.sin(angle)
         vX = v0 * math.cos(angle)
-        print(vX, vY)
+        ConsolePrinter.print("Calculated vX = %.2f, vY = %.2f for projectile"%(vX, vY), print_level= ConsolePrinter.VERBOSE)
         return vX, vY
 
     def __init__(self, x, y, xSpeed, ySpeed, weapon):
@@ -64,7 +64,7 @@ class Projectile(GameObject, Weapon_Executor):
         return GameObject.BoundingBox.create_bounding_box(self.x, self.y, 1, 1)
     
     def collision(self, gameobject) -> bool:
-        print("Projcetile collided with : %s"%gameobject)
+        ConsolePrinter.print("Projcetile collided with : %s"%gameobject, print_level=ConsolePrinter.VERBOSE)
         expl = Explosion(self.x, self.y, self.weapon.explosion_radius, self.weapon.damage)
         #expl = MushroomCloud(self.x, self.y, self.weapon.explosion_radius, self.weapon.damage)
         GameObjectHandler.get_instance().add_gameobject(expl)
@@ -102,7 +102,7 @@ class VulcanoBomb(Projectile):
         return self.hasCollided
     
     def collision(self, gameobject) -> bool:
-        print("Vulcano-bomb collided with : %s"%gameobject)
+        ConsolePrinter.print("Vulcano-bomb collided with : %s"%gameobject, print_level=ConsolePrinter.VERBOSE)
         self._finish_projectile()
         for i in range(self.weapon.n_cluster_projectiles):
             xSpeed, ySpeed = Projectile.calculate_xy_speed(angle = random.randint(190,350), v0 = self.weapon.v0)
@@ -123,7 +123,8 @@ class TeleportationGranade(Projectile):
         return self.hasCollided
     
     def collision(self, gameobject) -> bool:
-        print("Teleportation collided with : %s"%gameobject)
+        ConsolePrinter.print("Teleportation-granade collided with : %s"%gameobject, print_level=ConsolePrinter.VERBOSE)
+
         self.tank.x = self.x - int(TankGlobals.WIDTH / 2)
         self.tank.y = self.y - TankGlobals.HEIGHT - 5
         self.tank.ySpeed = 0
@@ -165,7 +166,8 @@ class Airstrike(Weapon_Executor, GameObject):
             """Adjusts the dropoff-point to simulate accuracy"""
             shift_direction = 1 if random.random() > 0.5 else -1
             shift = shift_direction * random.randint(0, int((1 - self.accuracy) * Airstrike.Airplane.ACCURACY_PLAY))
-            print("dropoff shifted by : %s"%shift)
+            ConsolePrinter.print("dropoff shifted by : %s"%shift, print_level=ConsolePrinter.VERBOSE)
+
             self.dropoff_x = self.dropoff_x +  shift
 
 
@@ -203,7 +205,7 @@ class Airstrike(Weapon_Executor, GameObject):
             planned_x, planned_y = pos
             if planned_y < Airstrike.Airplane.HEIGHT:
                 planned_y = Airstrike.Airplane.HEIGHT + 50
-            print("Planned_y %i"%planned_y)
+            ConsolePrinter.print("Planned y by airplane : %i"%planned_y)
             xfall = int(Airstrike.Airplane.SPEED * math.sqrt( 2 * (planned_y - Airstrike.Airplane.HEIGHT) / Globals.GRAVITY))
             if planned_x > Globals.SCREEN_WIDTH / 2:
                 self.airplane = Airstrike.Airplane(x = Globals.SCREEN_WIDTH + Airstrike.Airplane.WIDTH,
@@ -226,7 +228,6 @@ class Airstrike(Weapon_Executor, GameObject):
             if not self.airplane.has_duration:
                 self.airplane.has_duration = True
                 self.airplane.duration = 200
-           #print("Air plane done, duration left : %i"%self.airplane.duration)
 
 
     def draw(self, win):
