@@ -92,6 +92,9 @@ class Game:
 
 
     def redrawGame(self):
+        """
+        Calls for gameobject handler and menu bar to draw themeslves
+        """
         #GAME LOOP DRAWING
         #--------------------terrain drawing
         self.game_object_handler.draw_gameobjects(self.window)
@@ -121,6 +124,8 @@ class Game:
                 self.quitGame = True
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
+           
+        self.show_help_menu = pygame.key.get_pressed()[pygame.K_h]
 
         if not type(self.current_player) == HumanPlayer:
             pos = self.current_player.get_pos_for_projectile()
@@ -162,6 +167,7 @@ class Game:
         self.runGameLoop = True
         self.quitGame = False
         self.stage = Game.STAGE_ONE
+        self.current_player.begin_turn()
         while self.runGameLoop:
             
             if self.stage == Game.STAGE_ONE:

@@ -34,6 +34,7 @@ class Weapon_Executor:
     
 class Projectile(GameObject, Weapon_Executor):
 
+    @staticmethod
     def calculate_xy_speed(angle : float, v0 : float) -> tuple[float, float]:
         """
         Calculates vX and vY components of the vector given an anlge in degrees and a force v0 

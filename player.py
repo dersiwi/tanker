@@ -2,9 +2,10 @@ from core_objects import Tank
 from menubar import MenuBar
 from fpsConstants import Globals
 from weapons import Weapon
+from utilities import ConsolePrinter
 
 import random
-import pygame
+import pygame, math, time
 class Player:
     def __init__(self, name, color, weapons) -> None:
         self.fired = False
@@ -14,6 +15,9 @@ class Player:
         self.tank : Tank = None
 
     def begin_turn(self):
+        """
+        This method is called at the beginning of every players turn.
+        """
         self.fired = False
 
     def create_tank(self, x, y) -> Tank:
@@ -174,3 +178,73 @@ class RandomPlayer(Player):
         self.current_action = random.randint(min(RandomPlayer.ACTIONS), max(RandomPlayer.ACTIONS))
         self.action_duration = random.randint(RandomPlayer.MIN_ACTION_DURATION[self.current_action],
                                               RandomPlayer.MAX_ACTION_DURATION[self.current_action])
+        
+
+class SmartComputerPlayer(Player):
+
+    def __init__(self, name, color, weapons) -> None:
+        super().__init__(name, color, weapons)
+        self.other_players : list[Player] = None
+        self.target_player : Player = None
+        self.alpha : float = 0
+        self.v0 : float = 0
+
+    def set_other_player(self, other_players : list[Player]) -> None:
+        self.other_players = other_players
+
+
+    def begin_turn(self):
+        """
+        In this method the smart-computer player chooses a target
+        """
+        self.fired = False
+        self.target_player = random.choice(self.other_players)
+        if self.target_player.tank.tLp <= 0:
+            self.target_player = self.__get_first_living()
+        ConsolePrinter.print("Player %s aquired target %s"%(self.name, self.target_player.name), print_level=ConsolePrinter.VERBOSE)
+
+        alpha, v0 = self.__calculate_turret_angle_and_force()
+
+        self.tank.turretAngle = alpha
+        self.tank.v0 = v0
+    
+    def __calculate_turret_angle_and_force(self) -> tuple[float, float]:
+        """
+        Calculates angle alpha and force v0
+        """
+        #max height of the projectile.
+        distance = abs(self.tank.x - self.target_player.tank.x)
+        h_max = distance / 2 + self.tank.x
+
+        GRAVITY = Globals.GRAVITY / Globals.FPS.FPS
+
+        vY = (h_max -  self.tank.x) * 2 * GRAVITY
+        vX = distance / (math.sqrt((2*distance) / GRAVITY) + vY / GRAVITY)
+        v0 = math.sqrt(vX**2 + vY ** 2)
+        alpha_in_degrees = math.asin(vY/v0) * 180 / math.pi
+
+        ConsolePrinter.print("SmartComputer Target Calculation: x-Distance to target %i, h_max = %.2f, vY = %.2f, vX = %.2f, v0=%.2f, alpha = %.2f"%(distance, h_max, vY, vX, v0, alpha_in_degrees), 
+                             print_level=ConsolePrinter.VERBOSE)
+        
+        return alpha_in_degrees, v0
+
+    
+    def gameloop_iteration(self, keys_pressed, mouse_position) -> bool:      
+        #somehow shoot the target
+
+        return True
+
+    def get_pos_for_projectile(self):
+        x = random.randint(50, Globals.SCREEN_WIDTH - 50)
+        y = random.randint(50, Globals.SCREEN_HEIGHT - 50)
+        return (x,y)
+
+    
+    def __get_first_living(self):
+        for player in self.other_players:
+            if player.tank.tLp > 0:
+                return player
+        
+
+    def gameshop_iteration(self):
+        raise NotImplementedError("The Player class is not to be used directly. Initialize subclass instead.")

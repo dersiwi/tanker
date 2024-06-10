@@ -220,6 +220,9 @@ class Tank(GameObject):
 
 
     def adjust_turret_angle(self, adjustment : int):
+        """
+        Adjusts turret angle in degrees
+        """
         newAngle = self.turretAngle + adjustment
         if newAngle >= TankGlobals.MIN_ANGLE and newAngle <= TankGlobals.MAX_ANGLE:
             self.turretAngle = newAngle

@@ -68,3 +68,5 @@ A level where the map expands infinitely to the right and the player has to get 
 Either as leve-objects or just design objects in a terrain buildings like bunkers that can also shoot could be fun.
 
 
+### Controls
+Store a key->control mapping in `controls.json` and give user ability to change key-bindings.

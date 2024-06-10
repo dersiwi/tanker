@@ -8,7 +8,7 @@ from gameHandling import Game
 from startmenu import StartMenu, PlayerSelector
 from shop import GameShop
 from utilities import Colors, ConsolePrinter
-from player import Player, HumanPlayer, RandomPlayer
+from player import Player, HumanPlayer, RandomPlayer, SmartComputerPlayer
 from fpsConstants import Globals
 from weapons import WeaponsManager
 from gameobject import GameObjectHandler
@@ -20,7 +20,7 @@ parser = argparse.ArgumentParser(
     description="2d tank game"
 )
 parser.add_argument("-c", "--console_level", type=int, default=ConsolePrinter.NOTHING,
-                    help="Defines console messages to be displayed. 0 (debug), 1(regular), 2(verbose).")
+                    help="Defines console messages to be displayed. 0 (debug), 1(regular), 2(verbose), 3(all)")
 parser.add_argument("-s", "--shop", action="store_true", default=False, help="If typed, the program jumpts to the store without starting the game.")
 parser.add_argument("-t", "--throw", action="store_true", help="If called with this flag, an exception in the main method is thrown.")
 args = parser.parse_args()
@@ -48,9 +48,9 @@ pygame.display.set_caption("Tanker")
 
 
 
-def create_players(player_types):
-    player = []
-
+def create_players(player_types : list[int]) -> list[Player]:
+    players = []
+    ai_player : list[SmartComputerPlayer]= []
     for x, ptype in enumerate(player_types):
 
         if ptype == PlayerSelector.PlayerType.HUMAN:
@@ -63,12 +63,24 @@ def create_players(player_types):
                              weapons =  WeaponsManager.get_instance().get_initial_weapons())
             
         elif ptype == PlayerSelector.PlayerType.AI:
-            raise NotImplementedError("Ai not implemented yet")
-        
+            p = SmartComputerPlayer(name=x,
+                                    color=Colors.playerColors[x % len(Colors.playerColors)], 
+                                    weapons =  WeaponsManager.get_instance().get_initial_weapons())
+            ai_player.append(p)
         p.create_tank(x = random.randint(0, Globals.SCREEN_WIDTH), y = 200)
-        player.append(p)
+        players.append(p)
+    
+    #make all other players visible to the ai
+    for ai in ai_player:
+        other_players = []
+        for player in players:
+            if not player == ai:
+                other_players.append(player)
+        print("Setting ohter players : %s for player %s"%(other_players, ai))
+        ai.set_other_player(other_players)
 
-    return player
+
+    return players
 
 def main():
     startingMenu = StartMenu(screenWidth=w_width, screenHeight=w_height)
