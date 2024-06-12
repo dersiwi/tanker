@@ -26,6 +26,12 @@ class Game:
     STAGE_ONE = 1
     STAGE_TWO = 2
 
+    ITERATIONS_TIL_START = 30
+    """
+    Amount of gameloop-iterations until the players can actually do something.
+    in this time the players fall to the ground form the sky.
+    """
+
 
     def __init__(self, window, players : list[Player], terrain_id : int):
 
@@ -168,14 +174,17 @@ class Game:
         self.quitGame = False
         self.stage = Game.STAGE_ONE
         self.current_player.begin_turn()
+        iteration = 0
         while self.runGameLoop:
+
+            if iteration > Game.ITERATIONS_TIL_START:
             
-            if self.stage == Game.STAGE_ONE:
-                self.__stage_one_iteration()
-            elif self.stage == Game.STAGE_TWO:
-                self.__stage_two_iteration()
-            else:
-                raise ValueError("Unknown stage %i."%self.stage)
+                if self.stage == Game.STAGE_ONE:
+                    self.__stage_one_iteration()
+                elif self.stage == Game.STAGE_TWO:
+                    self.__stage_two_iteration()
+                else:
+                    raise ValueError("Unknown stage %i."%self.stage)
 
             if not self.projectile == None and self.projectile.hasCollided:
                 self.projectile = None
@@ -194,7 +203,7 @@ class Game:
             if self.current_player.tank.tLp == 0:
                 self.nextPlayer()
             self.redrawGame()
-
+            iteration += 1
         if self.quitGame:
             pygame.quit()
 

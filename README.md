@@ -46,7 +46,7 @@ and the game should start. Pygame and any other missing packages can be installe
 
 To see start-options call `$ python3 main.py --help`.
 
-## Further development
+## Necessray development
 
 ### Player types
 As of 08.06. the only working player-types are `human` and `random`. What i want to add in the future is a more intelligent player type that actually is a valid bot to play against.
@@ -56,6 +56,9 @@ Although a shop exists in which a player can select his weapons for the new roun
 
 The shop (currenlty) only contains only things that the player can fire. I want to add shields and mines to the shop as well.
 
+Computer-players also have to be able to interact with the shop.
+
+## Further development
 
 ### Levels
 

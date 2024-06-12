@@ -182,12 +182,16 @@ class RandomPlayer(Player):
 
 class SmartComputerPlayer(Player):
 
+    COUNT_UNTIL_SHOOT = 10
+
     def __init__(self, name, color, weapons) -> None:
         super().__init__(name, color, weapons)
         self.other_players : list[Player] = None
         self.target_player : Player = None
         self.alpha : float = 0
         self.v0 : float = 0
+
+        self.count_until_shoot : int = SmartComputerPlayer.COUNT_UNTIL_SHOOT
 
     def set_other_player(self, other_players : list[Player]) -> None:
         self.other_players = other_players
@@ -216,7 +220,7 @@ class SmartComputerPlayer(Player):
         distance = abs(self.tank.x - self.target_player.tank.x)
         h_max = distance / 2 + self.tank.x
 
-        GRAVITY = Globals.GRAVITY / Globals.FPS.FPS
+        GRAVITY = Globals.GRAVITY
 
         vY = (h_max -  self.tank.x) * 2 * GRAVITY
         vX = distance / (math.sqrt((2*distance) / GRAVITY) + vY / GRAVITY)
@@ -231,8 +235,14 @@ class SmartComputerPlayer(Player):
     
     def gameloop_iteration(self, keys_pressed, mouse_position) -> bool:      
         #somehow shoot the target
-
+        if self.count_until_shoot >= 0:
+            self.count_until_shoot -= 1
+            return False
+    
+        self.count_until_shoot = SmartComputerPlayer.COUNT_UNTIL_SHOOT
         return True
+    
+
 
     def get_pos_for_projectile(self):
         x = random.randint(50, Globals.SCREEN_WIDTH - 50)
