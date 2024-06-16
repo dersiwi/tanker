@@ -1,10 +1,10 @@
 
 from utils.utilities import Colors, TextButton, message_to_screen, ConsolePrinter
-from weapons import Weapon, WeaponsManager
+from weapons.weapons import Weapon, WeaponsManager
 from utils.fpsConstants import Globals
 import pygame
 from player import Player
-from core_objects import Tank
+from gameobjects.core_objects import Tank
 
 class GameShop:
 

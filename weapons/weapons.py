@@ -1,11 +1,11 @@
 import json
 
-from gameobject import GameObject, GameObjectHandler
+from gameobjects.gameobject import GameObject, GameObjectHandler
 from pygame.draw import circle, rect
 from pygame.mouse import get_pos
 from utils.fpsConstants import Globals
 from utils.utilities import Colors, DegreeCnvt, ConsolePrinter
-from explosions import Explosion, AdvancedExplosion
+from gameobjects.explosions import Explosion, AdvancedExplosion
 from utils.core_object_utilities import TankGlobals
 
 import math

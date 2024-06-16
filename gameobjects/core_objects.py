@@ -1,9 +1,9 @@
-from gameobject import GameObject, GameObjectHandler
+from gameobjects.gameobject import GameObject, GameObjectHandler
 from utils.utilities import DegreeCnvt, ExplosionData, Colors, ConsolePrinter
-from weapons import Weapon, Weapon_Executor
+from weapons.weapons import Weapon, Weapon_Executor
 from utils.fpsConstants import Globals
 from utils.core_object_utilities import TerrainType, TankGlobals, TankGraphics
-from explosions import Explosion
+from gameobjects.explosions import Explosion
 from pygame.draw import circle, line
 
 

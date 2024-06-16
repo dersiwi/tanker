@@ -1,7 +1,7 @@
-from core_objects import Tank
+from gameobjects.core_objects import Tank
 from menus.menubar import MenuBar
 from utils.fpsConstants import Globals
-from weapons import Weapon
+from weapons.weapons import Weapon
 from utils.utilities import ConsolePrinter
 
 import random

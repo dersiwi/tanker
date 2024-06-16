@@ -10,8 +10,8 @@ from menus.shop import GameShop
 from utils.utilities import Colors, ConsolePrinter
 from player import Player, HumanPlayer, RandomPlayer, SmartComputerPlayer
 from utils.fpsConstants import Globals
-from weapons import WeaponsManager
-from gameobject import GameObjectHandler
+from weapons.weapons import WeaponsManager
+from gameobjects.gameobject import GameObjectHandler
 
 
 #define args and argparser

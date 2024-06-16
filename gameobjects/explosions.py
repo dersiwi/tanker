@@ -1,5 +1,5 @@
 
-from gameobject import GameObject
+from gameobjects.gameobject import GameObject
 from pygame.draw import circle
 from utils.utilities import Colors, DegreeCnvt, ExplosionData
 import math

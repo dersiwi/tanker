@@ -1,7 +1,7 @@
 
 import pygame, math, random
-from core_objects import Tank, Terrain, Sun
-from gameobject import GameObject, GameObjectHandler
+from gameobjects.core_objects import Tank, Terrain, Sun
+from gameobjects.gameobject import GameObject, GameObjectHandler
 import utils
 
 

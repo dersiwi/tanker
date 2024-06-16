@@ -1,7 +1,7 @@
 import pygame
 from utils.fpsConstants import Globals
 from utils.utilities import TextButton, message_to_screen, Colors
-from core_objects import Tank, TankGlobals
+from gameobjects.core_objects import Tank, TankGlobals
 
 class MenuBar:
     def __init__(self):
