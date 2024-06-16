@@ -1,5 +1,5 @@
-from fpsConstants import Globals
-from utilities import ExplosionData, ConsolePrinter
+from utils.fpsConstants import Globals
+from utils.utilities import ExplosionData, ConsolePrinter
 
 
 

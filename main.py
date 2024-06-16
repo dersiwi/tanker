@@ -5,11 +5,11 @@ import pygame
 
 
 from gameHandling import Game
-from startmenu import StartMenu, PlayerSelector
-from shop import GameShop
-from utilities import Colors, ConsolePrinter
+from menus.startmenu import StartMenu, PlayerSelector
+from menus.shop import GameShop
+from utils.utilities import Colors, ConsolePrinter
 from player import Player, HumanPlayer, RandomPlayer, SmartComputerPlayer
-from fpsConstants import Globals
+from utils.fpsConstants import Globals
 from weapons import WeaponsManager
 from gameobject import GameObjectHandler
 

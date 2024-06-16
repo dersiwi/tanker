@@ -1,7 +1,7 @@
 
-from utilities import Colors, TextButton, message_to_screen, ConsolePrinter
+from utils.utilities import Colors, TextButton, message_to_screen, ConsolePrinter
 from weapons import Weapon, WeaponsManager
-from fpsConstants import Globals
+from utils.fpsConstants import Globals
 import pygame
 from player import Player
 from core_objects import Tank

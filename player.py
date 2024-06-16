@@ -1,8 +1,8 @@
 from core_objects import Tank
-from menubar import MenuBar
-from fpsConstants import Globals
+from menus.menubar import MenuBar
+from utils.fpsConstants import Globals
 from weapons import Weapon
-from utilities import ConsolePrinter
+from utils.utilities import ConsolePrinter
 
 import random
 import pygame, math, time

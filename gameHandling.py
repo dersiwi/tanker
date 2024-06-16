@@ -1,10 +1,10 @@
 from core_objects import Terrain, Sun
-from utilities import Colors, message_to_screen
-from fpsConstants import Globals
+from utils.utilities import Colors, message_to_screen
+from utils.fpsConstants import Globals
 from gameobject import GameObjectHandler
 from player import Player, HumanPlayer
 from weapons import Weapon_Executor
-from menubar import MenuBar
+from menus.menubar import MenuBar
 
 import pygame
 

@@ -3,16 +3,17 @@ import json
 from gameobject import GameObject, GameObjectHandler
 from pygame.draw import circle, rect
 from pygame.mouse import get_pos
-from fpsConstants import Globals
-from utilities import Colors, DegreeCnvt, ConsolePrinter
+from utils.fpsConstants import Globals
+from utils.utilities import Colors, DegreeCnvt, ConsolePrinter
 from explosions import Explosion, AdvancedExplosion
-from core_object_utilities import TankGlobals
+from utils.core_object_utilities import TankGlobals
 
 import math
 import random
+import os.path as path
 
 
-PATH = "data\\weapons.json"
+PATH = path.join("data", "weapons.json")
 
 class Weapon_Executor:
     """The weapon Executor is a parent-class for weapons like projectiles, which provides the 

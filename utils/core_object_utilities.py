@@ -1,6 +1,6 @@
 
 import json, math, random
-from fpsConstants import Globals
+from utils.fpsConstants import Globals
 from pygame.draw import ellipse, line
 
 
