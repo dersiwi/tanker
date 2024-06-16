@@ -15,6 +15,9 @@ import random
 PATH = "data\\weapons.json"
 
 class Weapon_Executor:
+    """The weapon Executor is a parent-class for weapons like projectiles, which provides the 
+    projectile_iteration interface. The projectile_iteration is called in each gameloop-iteration, after a player fires.
+    As soon as self.hasCollided is set to false this class is discarded."""
     def __init__(self) -> None:
         self.hasCollided : bool = False
         """
@@ -255,9 +258,11 @@ class Weapon:
         pass
 
     def decrementAmount(self):
+        """Decrements self.amount by one"""
         self.amount -= 1
 
-    def hasAmmoLeft(self):
+    def hasAmmoLeft(self) -> bool:
+        """True, if self.amount >= 1"""
         return self.amount >= 1
     
     def get_weapons_executor(self, tank) -> Weapon_Executor:
@@ -368,6 +373,8 @@ class WeaponsManager:
                     self.weapons[Weapon.TYPE_3].append(TypeThreeWeapon(weapondict))
                 
     def get_initial_weapons(self) -> list[Weapon]:
+        """Returns a list of weapons that are initial weapons for every player. The weapons added here
+        can be configured in weapons.json, where ecah weapon has an initial_amount-attribute."""
         init_weapons = []
         for w_type in self.weapons:
             for weapon in self.weapons[w_type]:
@@ -376,6 +383,7 @@ class WeaponsManager:
         return init_weapons
     
     def get_weapon_by_id(self, weaponid : int) -> Weapon:
+        """return a weapon given its @param weaponid."""
         for w_type in self.weapons:
             for weapon in self.weapons[w_type]:
                 if weapon.weapon_id == weaponid:

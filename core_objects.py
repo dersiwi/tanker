@@ -222,18 +222,20 @@ class Tank(GameObject):
     def adjust_turret_angle(self, adjustment : int):
         """
         Adjusts turret angle in degrees
+        @param adjustment is added onto current turret angle
         """
         newAngle = self.turretAngle + adjustment
         if newAngle >= TankGlobals.MIN_ANGLE and newAngle <= TankGlobals.MAX_ANGLE:
             self.turretAngle = newAngle
 
-            
+
     def get_bounding_box(self) -> tuple[int, int, int, int]:
         return GameObject.BoundingBox.create_bounding_box(self.x, self.y, TankGlobals.WIDTH, TankGlobals.HEIGHT)
     
     def explosion(self, expl : ExplosionData):
         if expl.is_in_radius(self.x, self.y) or expl.is_in_radius(self.x + TankGlobals.WIDTH, self.y):
-            self.tLp -= expl.damage
+            if self.shield == None or not self.shield.is_active:
+                self.tLp -= expl.damage
            
     def move(self, leftRight):
         #leftRight is either 1 or -1 to multiply the movement
@@ -242,8 +244,8 @@ class Tank(GameObject):
             self.fuel -= self.fuelPerMove
     
     def fire(self):
+        """Decrements the ammo of the current weaon by one. Pops weapon from self.weapons if no ammo left."""
         self.getCurrentWeapon().decrementAmount()
-
         if not self.getCurrentWeapon().hasAmmoLeft():
             self.weapons.pop(self.currentWeapon)
             self.changeWeapon()
@@ -271,9 +273,11 @@ class Tank(GameObject):
         return Tank.calculateTurretEndPos(self.x, self.y, self.turretAngle)
     
 
-    def deploy_shield(self):
+    def deploy_shield(self) -> None:
+        """Adds self.shield to GameObjectHandler and sets self.shield to None"""
         if not self.shield == None:
             GameObjectHandler.get_instance().add_gameobject(self.shield)
+            self.shield.set_active()
             self.shield = None
 
     def deploy_mine(self):
@@ -297,6 +301,12 @@ class Shield(GameObject):
         self.radius = 50
         self.ownertank : Tank = ownertank
         self.health = 100
+        self.is_active = False
+
+
+    def set_active(self) -> None:
+        """sets self.is_active to true. Is automatically set to False once shield has no hitpoints left"""
+        self.is_active = True
 
     def collision_detecetion(self, gameobject: GameObject):
         if type(gameobject) == Tank:
@@ -312,6 +322,7 @@ class Shield(GameObject):
         
         if self.health <= 0:
             GameObjectHandler.get_instance().remove_gameobject(self)
+            self.is_active = False
         
     def __is_inside(self, x, y):
         return abs(x - self.x) <= self.radius and abs(y - self.y) <= self.radius
