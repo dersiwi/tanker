@@ -1,0 +1,18 @@
+
+{
+    "menubar" : {
+        "color" : [230,238,240],
+        "width" : 1.0,
+        "height" :  0.15,
+        "change_weapon_button" : {
+            "x" : 410,
+            "y" : 25,
+            "text" : "Change Weapon",
+            "fontSize" : 20,
+            "colors": [110,110,110],
+            "border" : false,
+            "margin" : 0
+        }
+
+    }
+}

@@ -2,15 +2,31 @@ import pygame
 from utils.fpsConstants import Globals
 from utils.utilities import TextButton, message_to_screen, Colors
 from gameobjects.core_objects import Tank, TankGlobals
+import json
+
+
+class MenuBarLoader:
+    """This class is responsible for loading menubar contents like color, width etc."""
+    PATH ="data\menus.json"
+
+    def __init__(self) -> None:
+        with open(MenuBarLoader.PATH, "r") as file:
+            menudict = json.load(file)
+        self.info = menudict["menubar"]
 
 class MenuBar:
+    """
+    Menubar is displayed at the top of the screen when playing the game. The menu bar contains visuals and 
+    buttons for the player to see for example the force, left ammo and lifepoints.
+    """
     def __init__(self):
-        self.menuBarColor = (230,238,240)
-        self.width = Globals.SCREEN_WIDTH
-        self.height = int(Globals.SCREEN_HEIGHT*1.5/10)
+        mbLoader = MenuBarLoader()
+        self.menuBarColor = mbLoader.info["color"]
+        self.width = int(mbLoader.info["width"]*Globals.SCREEN_WIDTH)
+        self.height = int(mbLoader.info["height"]*Globals.SCREEN_HEIGHT)
 
         #(x, y, width, height, text=None, fontSize=12, color=Colors.black
-        self.changeWeaponButton = TextButton(x=410, y=25, text="Change Weapon", fontSize=20, color=Colors.grey)
+        self.changeWeaponButton = TextButton.from_json_dict(mbLoader.info["change_weapon_button"])
         self.moreForceButton = TextButton(x=600, y=10, text="More", fontSize=20)
         self.lessForceButton = TextButton(x=600, y=40, text="Less", fontSize=20)
         self.fireButton = TextButton(x=750, y=25, text="FIRE", fontSize=25, color=Colors.red)
@@ -45,3 +61,5 @@ class MenuBar:
 
         for button in self.buttons:
             button.draw(win)
+
+

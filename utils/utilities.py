@@ -123,6 +123,20 @@ class TextButton:
             
             m : is the added margin 
     """
+
+    def from_json_dict(confg : dict[str, any]):
+        """
+        Reads a json dict and returns a TextButton-object with the respective params in the json obejct.
+        """
+        return TextButton(
+            x = confg["x"],
+            y = confg["y"],
+            text = confg["text"],
+            fontSize= confg["fontSize"],
+            border = confg["border"],
+            margin = confg["margin"])
+
+
     def __init__(self, x, y, text=None, fontSize=12, color=Colors.black, border : bool = False, margin : int = 0):
         self.x = x
         self.y = y
